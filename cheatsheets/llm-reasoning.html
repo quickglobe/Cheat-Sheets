@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reasoning vs Size — LLM Model Selection Cheat Sheet</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+/* ============================================================
+   DESIGN SYSTEM — Prompting Cheat Sheet
+   Light + automatic dark mode via prefers-color-scheme
+   Fonts: DM Serif Display · DM Sans · JetBrains Mono
+   ============================================================ */
+
+/* ── TOKENS ────────────────────────────────────────────────── */
+:root {
+  --bg:       #f5f6fa;
+  --surface:  #ffffff;
+  --surface2: #eef0f6;
+  --border:   #d5d8e3;
+  --text:       #2e3248;
+  --text-bright:#1a1c2b;
+  --text-dim:   #555970;
+  --accent:      #d63555;
+  --accent-glow: rgba(214,53,85,0.08);
+  --teal:        #0e8a72;
+  --teal-glow:   rgba(14,138,114,0.07);
+  --blue:        #3a6ae8;
+  --blue-glow:   rgba(58,106,232,0.07);
+  --gold:        #c48800;
+  --gold-glow:   rgba(196,136,0,0.07);
+  --radius:       10px;
+  --font-display: 'DM Serif Display', Georgia, serif;
+  --font-body:    'DM Sans', sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:       #111218;
+    --surface:  #1a1b26;
+    --surface2: #222433;
+    --border:   #33364a;
+    --text:       #c4c7d8;
+    --text-bright:#eceef6;
+    --text-dim:   #8b8faa;
+    --accent:      #f0506a;
+    --accent-glow: rgba(240,80,106,0.14);
+    --teal:        #2ec4a2;
+    --teal-glow:   rgba(46,196,162,0.1);
+    --blue:        #6b9aff;
+    --blue-glow:   rgba(107,154,255,0.1);
+    --gold:        #f5b731;
+    --gold-glow:   rgba(245,183,49,0.1);
+  }
+  nav    { background: rgba(17,18,24,0.88); }
+  thead  { background: var(--surface2); }
+  code   { color: var(--teal); }
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { overflow-x: hidden; width: 100%; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.65;
+  -webkit-text-size-adjust: 100%;
+  padding-top: 52px;
+}
+
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  height: 52px;
+  background: rgba(245,246,250,0.88);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+nav::-webkit-scrollbar { display: none; }
+
+.logo {
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--accent);
+  white-space: nowrap;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.nav-btn {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  background: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: color 0.2s, background 0.2s;
+}
+.nav-btn:hover,
+.nav-btn.active {
+  color: var(--text-bright);
+  background: var(--surface2);
+}
+
+.container {
+  max-width: min(820px, 100%);
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+}
+
+.hero {
+  text-align: center;
+  padding: 48px 0 40px;
+  position: relative;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -60px; left: 50%;
+  transform: translateX(-50%);
+  width: min(500px, 100vw);
+  height: 400px;
+  background: radial-gradient(ellipse, rgba(214,53,85,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 6vw, 48px);
+  color: var(--text-bright);
+  letter-spacing: -0.5px;
+  margin-bottom: 12px;
+  position: relative;
+}
+.hero p {
+  color: var(--text-dim);
+  font-size: 16px;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+section {
+  margin-top: 48px;
+  scroll-margin-top: 68px;
+}
+
+.section-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.8px;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.section-label::before {
+  content: '';
+  width: 18px; height: 2px;
+  background: var(--accent);
+  border-radius: 1px;
+}
+
+h2 {
+  font-family: var(--font-display);
+  font-size: 28px;
+  color: var(--text-bright);
+  margin-bottom: 16px;
+}
+
+h3 {
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--text-bright);
+  margin: 24px 0 10px;
+}
+
+p + p { margin-top: 10px; }
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.card {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  transition: border-color 0.3s, box-shadow 0.3s, transform 0.2s;
+}
+@media (hover: hover) {
+  .card:hover {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+    transform: translateY(-2px);
+  }
+}
+@media (hover: none) {
+  .card.in-view {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+}
+
+.card .num {
+  font-family: var(--font-display);
+  font-size: 28px;
+  color: var(--accent);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.card strong { color: var(--text-bright); display: block; margin-bottom: 4px; }
+.card span   { font-size: 13.5px; color: var(--text-dim); }
+
+.table-wrap {
+  margin-top: 16px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  max-width: 100%;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  table-layout: fixed;
+  word-wrap: break-word;
+}
+thead { background: var(--surface2); }
+th {
+  text-align: left;
+  padding: 12px 16px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-bright);
+  border-bottom: 1px solid var(--border);
+}
+td {
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+tr:last-child td { border-bottom: none; }
+tr:nth-child(even) { background: color-mix(in srgb, var(--surface2) 40%, transparent); }
+
+code, .code-block {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  background: var(--surface2);
+  border-radius: 5px;
+}
+code {
+  padding: 2px 7px;
+  color: var(--teal);
+}
+.code-block {
+  display: block;
+  padding: 14px 18px;
+  margin: 10px 0;
+  color: var(--text);
+  border: 1px solid var(--border);
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.55;
+}
+
+.tip {
+  border-left: 3px solid var(--teal);
+  background: var(--teal-glow);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin: 16px 0;
+}
+.tip.blue { border-color: var(--blue); background: var(--blue-glow); }
+.tip.gold { border-color: var(--gold); background: var(--gold-glow); }
+.tip.red  { border-color: var(--accent); background: var(--accent-glow); }
+
+.tip-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  margin-bottom: 6px;
+}
+.tip      .tip-label { color: var(--teal); }
+.tip.blue .tip-label { color: var(--blue); }
+.tip.gold .tip-label { color: var(--gold); }
+.tip.red  .tip-label { color: var(--accent); }
+
+ul.styled { list-style: none; margin: 10px 0; }
+ul.styled li {
+  position: relative;
+  padding-left: 20px;
+  margin-bottom: 6px;
+}
+ul.styled li::before {
+  content: '›';
+  position: absolute;
+  left: 4px;
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.ba-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 16px;
+}
+.ba-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+.ba-box.after { border-color: var(--teal); }
+.ba-tag {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+  margin-bottom: 10px;
+}
+.ba-box:not(.after) .ba-tag { color: var(--text-dim); }
+.ba-box.after       .ba-tag { color: var(--teal); }
+.ba-box blockquote {
+  font-style: italic;
+  color: var(--text-dim);
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+.ba-box.after blockquote { color: var(--text); }
+
+.tabs { display: flex; gap: 4px; margin: 16px 0 0; flex-wrap: wrap; }
+.tab-btn {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.tab-btn:hover { color: var(--text-bright); border-color: var(--text-dim); }
+.tab-btn.active { color: var(--accent); border-color: var(--accent); background: var(--accent-glow); }
+.tab-panel { display: none; margin-top: 14px; }
+.tab-panel.active { display: block; }
+
+footer {
+  text-align: center;
+  padding: 40px 24px;
+  color: var(--text-dim);
+  font-size: 13px;
+  border-top: 1px solid var(--border);
+  margin-top: 56px;
+  word-break: break-word;
+}
+footer a { color: var(--accent); text-decoration: none; }
+
+@media (max-width: 600px) {
+  .ba-grid, .card-grid { grid-template-columns: 1fr; }
+  .container  { padding: 24px 16px 60px; }
+  nav         { padding: 0 12px; gap: 4px; }
+  .hero       { padding: 32px 0 28px; }
+  .hero h1    { font-size: 28px; }
+  h2          { font-size: 22px; }
+  table       { font-size: 13px; }
+  th, td      { padding: 9px 10px; }
+  .code-block { font-size: 12px; padding: 12px 14px; }
+  .tab-btn    { font-size: 12px; padding: 6px 12px; }
+}
+  </style>
+</head>
+<body>
+
+<nav>
+  <span class="logo">LLM Selector</span>
+  <button class="nav-btn" onclick="scrollToSection('axes')">The Two Axes</button>
+  <button class="nav-btn" onclick="scrollToSection('reasoning-wins')">Reasoning Wins</button>
+  <button class="nav-btn" onclick="scrollToSection('size-wins')">Bigger Wins</button>
+  <button class="nav-btn" onclick="scrollToSection('crossover')">Crossover Table</button>
+  <button class="nav-btn" onclick="scrollToSection('watchouts')">Watch Outs</button>
+  <button class="nav-btn" onclick="scrollToSection('prompting')">Prompting Tips</button>
+  <button class="nav-btn" onclick="scrollToSection('picker')">Quick Picker</button>
+</nav>
+
+<div class="container">
+
+  <div class="hero">
+    <h1>Reasoning vs Size</h1>
+    <p>When to use a reasoning model, when to scale up model size, and how to navigate the crossover points — for intermediate LLM users.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <section id="axes">
+    <div class="section-label">Section 01</div>
+    <h2>The Two Axes</h2>
+    <p>Model selection has two largely independent levers. Understanding what each actually does prevents the mistake of defaulting to "bigger is better" when thinking is needed, or vice versa.</p>
+
+    <div class="ba-grid">
+      <div class="ba-box">
+        <div class="ba-tag">More Parameters (Size)</div>
+        <blockquote>Compresses more world knowledge and pattern associations into weights. A larger model has seen more, knows more, and generalises better across diverse domains — but still answers in a single forward pass.</blockquote>
+      </div>
+      <div class="ba-box after">
+        <div class="ba-tag">Reasoning / Extended Thinking</div>
+        <blockquote>Adds inference-time compute. The model explicitly works through intermediate steps before answering — spending more tokens to plan, verify, and self-correct. This is orthogonal to raw size: a small model with thinking can beat a larger model without it on structured problem-solving.</blockquote>
+      </div>
+    </div>
+
+    <div class="tip blue">
+      <div class="tip-label">Remember</div>
+      These two dimensions are <strong>orthogonal and can be combined</strong>. Haiku + extended thinking, Sonnet + adaptive thinking, Opus + adaptive thinking are all distinct operating modes with distinct cost/quality profiles. The question is always which combination makes sense for a specific task.
+    </div>
+
+    <h3>The Key Dimensions to Weigh</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th style="width:22%">Dimension</th><th style="width:39%">Larger Model Helps</th><th style="width:39%">Reasoning Mode Helps</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Knowledge breadth</strong></td><td>Deep factual recall, obscure domain knowledge, recent events</td><td>Minimal benefit — thinking doesn't add knowledge it doesn't have</td></tr>
+          <tr><td><strong>Reasoning depth</strong></td><td>Moderate benefit from better training</td><td>Strong benefit — explicit step-by-step verification catches errors</td></tr>
+          <tr><td><strong>Instruction following</strong></td><td>Larger models handle complex, nuanced instructions more reliably</td><td>Can help with multi-constraint satisfaction but adds latency overhead</td></tr>
+          <tr><td><strong>Creative quality</strong></td><td>Strongly favours larger models — richer stylistic range</td><td>Often hurts — reasoning can make outputs feel mechanical</td></tr>
+          <tr><td><strong>Latency</strong></td><td>Larger = slower, but faster-to-first-token on simple outputs</td><td>Significantly slower — TTFT delayed by thinking blocks</td></tr>
+          <tr><td><strong>Cost</strong></td><td>Scales with model tier (roughly 5–25× across tiers)</td><td>5–10× premium on top of base model cost; scales with thinking tokens</td></tr>
+          <tr><td><strong>Context window</strong></td><td>Larger models often have bigger windows (Haiku 4.5: 200K vs Sonnet/Opus 4.6: 1M)</td><td>Thinking blocks consume context too — budget carefully</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <section id="reasoning-wins">
+    <div class="section-label">Section 02</div>
+    <h2>When Reasoning Wins</h2>
+    <p>Reasoning (extended/adaptive thinking) earns its cost premium in specific structural conditions. Below are the conditions with the strongest signal — if your task matches several of these, turn thinking on.</p>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="num">1</div>
+        <strong>Five or more sequential steps</strong>
+        <span>Research shows reasoning models outperform non-reasoning equivalents by ~17% when chain-of-thought requires 5+ steps, but only ~3% for under 5 steps. Under 3 steps, reasoning models can <em>underperform</em> due to overthinking.</span>
+      </div>
+      <div class="card">
+        <div class="num">2</div>
+        <strong>Verifiable correctness matters</strong>
+        <span>Math, code logic, formal proofs, algorithm correctness, constraint satisfaction. The model can self-check intermediate steps — which matters when wrong is worse than slow.</span>
+      </div>
+      <div class="card">
+        <div class="num">3</div>
+        <strong>Novel problem structure</strong>
+        <span>Problems the model can't pattern-match from training — unfamiliar combinations, unusual constraints. Reasoning helps the model construct rather than recall an answer.</span>
+      </div>
+      <div class="card">
+        <div class="num">4</div>
+        <strong>Strategic / agentic planning</strong>
+        <span>Multi-step plans with dependencies, decision trees, or backtracking. Reasoning models excel at decomposing goals and managing sequential uncertainty — OpenAI recommend o-series for agent orchestration.</span>
+      </div>
+      <div class="card">
+        <div class="num">5</div>
+        <strong>Debugging complex systems</strong>
+        <span>Tracing failures through layered systems — distributed code, multi-step pipelines, logical contradictions. The explicit chain-of-thought makes errors easier to spot and correct.</span>
+      </div>
+      <div class="card">
+        <div class="num">6</div>
+        <strong>High-stakes decisions with low error tolerance</strong>
+        <span>Research suggests reasoning models outperform on cost-adjusted accuracy as soon as the economic cost of a mistake exceeds ~$0.01. For high-value decisions, the premium pays for itself.</span>
+      </div>
+    </div>
+
+    <div class="tip">
+      <div class="tip-label">Pro Tip</div>
+      Use reasoning mode as a <strong>planner</strong> feeding into a non-reasoning executor. This hybrid pattern — reason once to produce a plan or decision, then execute with a faster model — captures most of the accuracy benefit at a fraction of the full cost.
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <section id="size-wins">
+    <div class="section-label">Section 03</div>
+    <h2>When Bigger Wins</h2>
+    <p>More parameters means more knowledge, finer stylistic control, and better generalisation — without the latency tax of inference-time compute. These are the cases where going up a tier beats turning on thinking.</p>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="num">1</div>
+        <strong>Knowledge-intensive tasks</strong>
+        <span>Factual recall, domain expertise, synthesis across sources. Larger models know more — reasoning cannot manufacture knowledge it wasn't trained on. Sonnet over Haiku+thinking for knowledge-heavy tasks.</span>
+      </div>
+      <div class="card">
+        <div class="num">2</div>
+        <strong>Creative and stylistic work</strong>
+        <span>Writing, tone matching, nuanced rewriting, poetry, brand voice. Reasoning can make outputs feel mechanical and over-structured. Larger models have richer stylistic range without the thinking overhead.</span>
+      </div>
+      <div class="card">
+        <div class="num">3</div>
+        <strong>Complex instruction following</strong>
+        <span>Long system prompts, multi-constraint outputs, persona maintenance across a conversation. Larger models track complex rules more reliably without explicit step-by-step reasoning.</span>
+      </div>
+      <div class="card">
+        <div class="num">4</div>
+        <strong>Long-context comprehension</strong>
+        <span>Analysing large codebases, long documents, or extended conversation history. Opus 4.6/4.7 and Sonnet 4.6 have 1M token context vs Haiku 4.5's 200K — and more parameters to make sense of that context.</span>
+      </div>
+      <div class="card">
+        <div class="num">5</div>
+        <strong>Latency-sensitive applications</strong>
+        <span>Real-time chat, voice agents, interactive tools. Reasoning's thinking phase delays time-to-first-token significantly. Sonnet without thinking is faster than Haiku with thinking for interactive use.</span>
+      </div>
+      <div class="card">
+        <div class="num">6</div>
+        <strong>Structured output reliability</strong>
+        <span>JSON generation, function calling, consistent format adherence. Research and practitioner experience suggest non-reasoning models produce more consistent structured outputs — reasoning mode can introduce variability.</span>
+      </div>
+    </div>
+
+    <div class="tip gold">
+      <div class="tip-label">When to Use</div>
+      A useful heuristic: if you could solve the task by being <strong>very knowledgeable</strong> without particularly deliberating, bigger model wins. If you could solve it by <strong>thinking carefully step by step</strong> even without deep domain knowledge, reasoning mode wins.
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <section id="crossover">
+    <div class="section-label">Section 04</div>
+    <h2>The Crossover Table</h2>
+    <p>The practical question is usually not "should I use reasoning?" in the abstract — it's "which specific combination wins for this task?" These are the key crossover decisions for the Claude 4.x family (valid as of mid-2026).</p>
+
+    <div class="tip blue">
+      <div class="tip-label">Model Context</div>
+      <strong>Haiku 4.5</strong> — fastest, cheapest (~$1/$5 per M tokens), 200K context, supports extended thinking, no adaptive thinking, max 8K output. <strong>Sonnet 4.6</strong> — balanced (~$3/$15 per M tokens), 1M context, adaptive thinking (recommended) + extended thinking (legacy), 16K max output. <strong>Opus 4.6/4.7</strong> — most capable (~$15/$75 per M tokens), 1M context, adaptive thinking only, 32K–64K max output.
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="showTab(event, 'tab-haiku-vs-sonnet')">Haiku+Thinking vs Sonnet</button>
+      <button class="tab-btn" onclick="showTab(event, 'tab-sonnet-vs-opus')">Sonnet+Thinking vs Opus</button>
+      <button class="tab-btn" onclick="showTab(event, 'tab-haiku-vs-opus')">Haiku vs Opus (no thinking)</button>
+    </div>
+
+    <div id="tab-haiku-vs-sonnet" class="tab-panel active">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th style="width:30%">Task</th><th style="width:35%">Haiku 4.5 + Thinking</th><th style="width:35%">Sonnet 4.6 (no thinking)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Math / logic puzzles (moderate)</td><td>✅ Good — explicit reasoning compensates for smaller size</td><td>⚠️ Reasonable but may make step errors</td></tr>
+            <tr><td>Knowledge questions (factual)</td><td>❌ Thinking doesn't add knowledge Haiku lacks</td><td>✅ Better — more knowledge in weights</td></tr>
+            <tr><td>Code debugging (simple–moderate)</td><td>✅ Thinking helps trace errors systematically</td><td>✅ Also strong — sufficient knowledge of patterns</td></tr>
+            <tr><td>Creative writing</td><td>❌ Thinking makes output feel mechanical; smaller vocab range</td><td>✅ Richer stylistic range, more natural</td></tr>
+            <tr><td>Classification / routing</td><td>❌ Overthinking overhead; Haiku without thinking is better</td><td>✅ Faster, reliable, appropriate</td></tr>
+            <tr><td>Multi-step planning (5+ steps)</td><td>✅ Thinking compensates significantly for size</td><td>⚠️ Manages but more likely to drop constraints</td></tr>
+            <tr><td>Long document analysis (&gt;100K tokens)</td><td>❌ Haiku 4.5 capped at 200K context</td><td>✅ 1M context, better comprehension at scale</td></tr>
+            <tr><td>Real-time / interactive</td><td>⚠️ Thinking adds latency; use Haiku without thinking</td><td>✅ Faster TTFT than Haiku+thinking</td></tr>
+            <tr><td>High-volume pipelines (cost primary)</td><td>✅ Cheaper even with thinking for moderate tasks</td><td>⚠️ More expensive — justify with quality need</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="tip">
+        <div class="tip-label">Rule of Thumb</div>
+        Choose Haiku+thinking when the task is <strong>reasoning-bound</strong> (needs logical steps, not deep knowledge) and cost matters. Choose Sonnet when the task is <strong>knowledge-bound or creative</strong>, or when latency is important.
+      </div>
+    </div>
+
+    <div id="tab-sonnet-vs-opus" class="tab-panel">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th style="width:30%">Task</th><th style="width:35%">Sonnet 4.6 + Thinking</th><th style="width:35%">Opus 4.6/4.7 (no thinking)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Complex math / hard reasoning</td><td>✅ Thinking mode very strong here</td><td>✅ Opus knowledge + heuristics also competitive</td></tr>
+            <tr><td>Nuanced judgment / ethics / strategy</td><td>⚠️ Reasoning can over-formalise nuanced judgements</td><td>✅ Opus captures subtlety better; reasoning may over-structure</td></tr>
+            <tr><td>Long-horizon agentic coding</td><td>✅ Thinking + tools — strong for multi-step code tasks</td><td>✅ Opus preferred for very large codebases (&gt;200K context use)</td></tr>
+            <tr><td>Creative writing (premium quality)</td><td>❌ Thinking hurts creative flow</td><td>✅ Opus without thinking — richest output quality</td></tr>
+            <tr><td>Very long outputs (&gt;16K tokens)</td><td>❌ Sonnet max output is 16K tokens</td><td>✅ Opus supports 32K–64K output</td></tr>
+            <tr><td>Complex architecture decisions</td><td>✅ Thinking helps decompose tradeoffs</td><td>✅ Opus's broader training also helps here</td></tr>
+            <tr><td>Structured data extraction</td><td>⚠️ Consistent but reasoning adds cost without gain</td><td>✅ More reliable instruction following, faster</td></tr>
+            <tr><td>Scientific / research synthesis</td><td>✅ Thinking helps connect evidence chains</td><td>✅ Opus's knowledge depth is the bigger factor</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="tip">
+        <div class="tip-label">Rule of Thumb</div>
+        Choose Sonnet+thinking when the task is <strong>structurally complex</strong> with verifiable steps. Choose Opus (without thinking) when the task requires <strong>depth of knowledge, nuanced judgement, very long outputs, or creative quality</strong> that thinking would constrain.
+      </div>
+    </div>
+
+    <div id="tab-haiku-vs-opus" class="tab-panel">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th style="width:30%">Task</th><th style="width:35%">Haiku 4.5 (no thinking)</th><th style="width:35%">Opus 4.6/4.7 (no thinking)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Simple Q&amp;A / lookup</td><td>✅ Fast, cheap, sufficient</td><td>❌ 25× more expensive with no quality gain</td></tr>
+            <tr><td>Classification / moderation</td><td>✅ Ideal — speed and throughput matter</td><td>❌ Wasteful overkill</td></tr>
+            <tr><td>Customer support triage</td><td>✅ Handles routing, FAQs, simple replies</td><td>❌ Over-engineered for this use case</td></tr>
+            <tr><td>Complex research synthesis</td><td>❌ Knowledge gaps and context limits hurt</td><td>✅ Significantly better quality</td></tr>
+            <tr><td>Long document analysis</td><td>❌ 200K context limit is a hard barrier</td><td>✅ 1M context, superior comprehension</td></tr>
+            <tr><td>High-volume extraction pipeline</td><td>✅ Cost and speed make this viable at scale</td><td>❌ Cost prohibitive unless quality critical</td></tr>
+            <tr><td>Flagship creative output</td><td>❌ Limited stylistic depth</td><td>✅ Best quality across all tiers</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="tip gold">
+        <div class="tip-label">When to Use</div>
+        The Haiku vs Opus gap is so large that there's rarely an argument for Opus on tasks Haiku can do well. Opus is for tasks where <strong>quality is the primary constraint</strong> and cost is secondary — deep analysis, premium creative work, very long outputs, or long-context comprehension.
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <section id="watchouts">
+    <div class="section-label">Section 05</div>
+    <h2>Reasoning Model Watch Outs</h2>
+    <p>Reasoning mode is not a universal upgrade. Several well-documented failure modes can make it <em>worse</em> than a non-reasoning equivalent — know these before defaulting to "turn thinking on."</p>
+
+    <div class="tip red">
+      <div class="tip-label">Watch Out</div>
+      <strong>Overthinking on easy tasks.</strong> Research (THOUGHTTERMINATOR paper, 2025) found reasoning models are poorly calibrated on simple problems — they generate large amounts of redundant tokens that don't improve accuracy. On very easy tasks, reasoning models underperformed GPT-4o in ~24% of cases. Use thinking only when the task genuinely warrants it.
+    </div>
+
+    <div class="tip red">
+      <div class="tip-label">Watch Out</div>
+      <strong>Reasoning hallucinations.</strong> Reasoning models can produce "logically coherent but factually incorrect" chains — the confident step-by-step format makes these harder to detect than standard hallucinations. Multiple studies (Tsinghua/NUS 2025, Renmin University 2025) found reasoning models show increased factuality degradation on knowledge benchmarks like SimpleQA compared to their non-reasoning counterparts.
+    </div>
+
+    <div class="tip red">
+      <div class="tip-label">Watch Out</div>
+      <strong>Structured output inconsistency.</strong> Reasoning mode can introduce variability in structured outputs (JSON, function calls, schemas). For reliable structured generation, non-reasoning models with explicit format instructions tend to be more consistent. DeepSeek V3.1 explicitly disables reasoning for function calling.
+    </div>
+
+    <div class="tip red">
+      <div class="tip-label">Watch Out</div>
+      <strong>Visual/multimodal degradation.</strong> Research (RH-Bench, 2025) found that longer reasoning chains reduce the model's attention to visual inputs, amplifying visual hallucinations in multimodal tasks. Use reasoning mode cautiously when vision is load-bearing.
+    </div>
+
+    <div class="tip red">
+      <div class="tip-label">Watch Out</div>
+      <strong>Don't add CoT prompting to reasoning models.</strong> Reasoning models already perform chain-of-thought internally — adding explicit "think step by step" instructions is redundant and can interfere. Keep prompts minimal: state the task, constraints, and desired output format. Limit few-shot examples to one or two.
+    </div>
+
+    <div class="tip red">
+      <div class="tip-label">Watch Out</div>
+      <strong>Context budget.</strong> Thinking tokens count against your context window. Haiku 4.5's 200K limit can be consumed quickly by large thinking budgets on long-context tasks. Sonnet 4.6 and Opus 4.6/4.7's 1M window is more permissive, but interleaved thinking across many tool calls can still accumulate unexpectedly.
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <section id="prompting">
+    <div class="section-label">Section 06</div>
+    <h2>Prompting Adjustments by Mode</h2>
+    <p>The same prompt that works well for a non-reasoning model often needs adjustment for a reasoning model, and vice versa. These are the key differences.</p>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="showTab(event, 'tab-prompt-reasoning')">Reasoning Mode</button>
+      <button class="tab-btn" onclick="showTab(event, 'tab-prompt-nonreasoning')">Non-Reasoning Mode</button>
+      <button class="tab-btn" onclick="showTab(event, 'tab-prompt-hybrid')">Hybrid Patterns</button>
+    </div>
+
+    <div id="tab-prompt-reasoning" class="tab-panel active">
+      <h3>Prompting Reasoning Models</h3>
+      <ul class="styled">
+        <li><strong>Be minimal.</strong> State the task, constraints, and output format. Don't pad with context that isn't structurally necessary — the model will reason through it itself.</li>
+        <li><strong>No explicit CoT instructions.</strong> Don't say "think step by step" or "reason carefully" — these are redundant and can inflate token usage without benefit.</li>
+        <li><strong>Few-shot sparingly.</strong> One or two examples maximum. More examples don't add value and may constrain the model's reasoning path.</li>
+        <li><strong>Define "done."</strong> For agentic tasks, specify what a correct answer looks like and how the model should verify its work — this guides the reasoning toward productive self-checking.</li>
+        <li><strong>Treat <code>reasoning_effort</code> / thinking budget as a tuning knob.</strong> Start lower and increase if quality is insufficient — don't default to maximum.</li>
+        <li><strong>Specify constraints explicitly.</strong> Reasoning models are good at satisfying stated constraints — the more precisely you specify them, the better the reasoning will honour them.</li>
+      </ul>
+      <div class="ba-grid">
+        <div class="ba-box">
+          <div class="ba-tag">Don't (reasoning mode)</div>
+          <blockquote>You are an expert software engineer. Think carefully and step by step about this problem. First, consider all the possible approaches. Then, reason through each one thoroughly before picking the best solution. Here are three examples of how I'd like you to approach this… [3 long examples follow]</blockquote>
+        </div>
+        <div class="ba-box after">
+          <div class="ba-tag">Do (reasoning mode)</div>
+          <blockquote>Refactor this Python function to handle the edge case where the input list is empty. Output: a single corrected function with a docstring. Constraints: must not change the function signature.</blockquote>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-prompt-nonreasoning" class="tab-panel">
+      <h3>Prompting Non-Reasoning Models</h3>
+      <ul class="styled">
+        <li><strong>Explicit CoT is valuable.</strong> Add "think step by step" or structure your prompt to elicit intermediate reasoning — this compensates for the lack of built-in thinking.</li>
+        <li><strong>Few-shot examples work well.</strong> Non-reasoning models respond strongly to pattern demonstration — use 2–5 examples for format-sensitive tasks.</li>
+        <li><strong>Role / persona framing helps.</strong> "You are a senior data analyst" sets a consistent frame that shapes output style and vocabulary across a response.</li>
+        <li><strong>Be explicit about output format.</strong> XML tags, JSON schemas, numbered lists — non-reasoning models benefit from precise format specification and will adhere reliably.</li>
+        <li><strong>Use scratchpad patterns.</strong> Ask for reasoning in a tagged block before the final answer: <code>&lt;thinking&gt;...&lt;/thinking&gt;</code> followed by <code>&lt;answer&gt;...&lt;/answer&gt;</code>.</li>
+        <li><strong>Chain prompts for complex tasks.</strong> Split multi-step work into sequential prompts rather than asking for everything at once — non-reasoning models are more reliable when scope is bounded.</li>
+      </ul>
+    </div>
+
+    <div id="tab-prompt-hybrid" class="tab-panel">
+      <h3>Hybrid Patterns</h3>
+      <p>Combining reasoning and non-reasoning models in a pipeline often beats using either alone. These patterns are used in production by OpenAI, Anthropic, and their customers.</p>
+      <div class="card-grid">
+        <div class="card">
+          <div class="num">A</div>
+          <strong>Plan → Execute</strong>
+          <span>Use Sonnet+thinking (or Opus) to produce a structured plan or decision. Feed the plan into Haiku (no thinking) for fast, cheap execution of each step. Best for agentic workflows with many routine sub-tasks.</span>
+        </div>
+        <div class="card">
+          <div class="num">B</div>
+          <strong>Triage → Escalate</strong>
+          <span>Route simple queries through Haiku (no thinking). A classifier detects queries needing deeper reasoning and escalates to Sonnet+thinking. Reduces cost while maintaining quality on hard cases.</span>
+        </div>
+        <div class="card">
+          <div class="num">C</div>
+          <strong>Draft → Refine</strong>
+          <span>Use Sonnet (no thinking) for a fast first draft. Use Sonnet+thinking or Opus to critique and refine. Cheaper than starting with the high-end model, better than staying with the cheap one.</span>
+        </div>
+        <div class="card">
+          <div class="num">D</div>
+          <strong>Verify → Confirm</strong>
+          <span>Non-reasoning model produces an answer. Reasoning model checks it for logical consistency or constraint satisfaction. Useful when output must be auditable but generation should be fast.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <section id="picker">
+    <div class="section-label">Section 07</div>
+    <h2>Quick Picker</h2>
+    <p>A fast-scan decision aid. Start at the top and stop at the first match.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th style="width:28%">If your task is…</th><th style="width:20%">Use this</th><th style="width:52%">Rationale</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Simple Q&amp;A, classification, routing, triage, basic text gen</td><td><code>Haiku</code> (no thinking)</td><td>Speed and cost dominate. Thinking adds overhead with no gain.</td></tr>
+          <tr><td>Standard writing, summarisation, drafting, moderate code, data extraction</td><td><code>Sonnet</code> (no thinking)</td><td>Balanced capability. Knowledge and instruction-following matter more than deliberation.</td></tr>
+          <tr><td>Creative writing, brand voice, nuanced rewriting, stylistic tasks</td><td><code>Sonnet</code> or <code>Opus</code> (no thinking)</td><td>Reasoning hurts creative output. Bigger model = richer stylistic range.</td></tr>
+          <tr><td>Moderate reasoning (3–8 steps), debugging, constraint satisfaction, moderate math</td><td><code>Haiku + thinking</code> or <code>Sonnet + thinking</code></td><td>Thinking compensates for reasoning gaps. Haiku if cost matters; Sonnet if knowledge is also needed.</td></tr>
+          <tr><td>Complex multi-step reasoning, hard math, algorithm design, 5+ step logic chains</td><td><code>Sonnet + thinking</code></td><td>Best accuracy-cost ratio for structured problem-solving at this complexity level.</td></tr>
+          <tr><td>Agentic planning, orchestration, multi-step code with tool use</td><td><code>Sonnet + thinking</code></td><td>Thinking + interleaved tool use is the right profile for agent tasks.</td></tr>
+          <tr><td>Long document / codebase analysis (&gt;200K tokens)</td><td><code>Sonnet 4.6</code> or <code>Opus 4.6/4.7</code></td><td>Haiku 4.5 is capped at 200K. Large context needs a large-context model.</td></tr>
+          <tr><td>Outputs &gt;16K tokens (long reports, large code files)</td><td><code>Opus 4.6/4.7</code></td><td>Sonnet 4.6 max output is 16K. Opus supports 32K–64K.</td></tr>
+          <tr><td>Deep research synthesis, nuanced expert judgement, premium analysis</td><td><code>Opus</code> (adaptive thinking on if needed)</td><td>Knowledge depth and judgement quality is the bottleneck — not reasoning steps.</td></tr>
+          <tr><td>Real-time / voice / interactive UI</td><td><code>Haiku</code> or <code>Sonnet</code> (no thinking)</td><td>Thinking's TTFT delay is prohibitive for interactive use.</td></tr>
+          <tr><td>High-volume pipelines where cost is the primary constraint</td><td><code>Haiku</code> (no thinking)</td><td>5–25× cheaper. Add thinking only if quality deltas are clearly measurable.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tip">
+      <div class="tip-label">Pro Tip</div>
+      When you're genuinely unsure whether thinking helps, <strong>test empirically</strong>: run a sample of your actual tasks through Sonnet with and without thinking. Measure quality difference, cost difference, and latency difference. For many real-world tasks, the improvement is smaller than expected — and sometimes absent entirely.
+    </div>
+
+    <div class="tip gold">
+      <div class="tip-label">Caveat</div>
+      This landscape changes rapidly. Anthropic releases new models and updates capabilities frequently — for example, Haiku 4.5 only gained extended thinking in October 2025. Always verify current model specs and pricing before building around a specific combination.
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  Reasoning vs Size — LLM Model Selection Cheat Sheet · Built with Claude · May 2026<br>
+  Sources: <a href="https://www.prompthub.us/blog/prompt-engineering-with-reasoning-models" target="_blank">PromptHub</a> ·
+  <a href="https://platform.openai.com/docs/guides/reasoning-best-practices" target="_blank">OpenAI Reasoning Best Practices</a> ·
+  <a href="https://platform.claude.com/docs/en/build-with-claude/extended-thinking" target="_blank">Anthropic Extended Thinking Docs</a>
+</footer>
+
+<script>
+  function showTab(event, id) {
+    const tabs = event.target.closest('.tabs');
+    const section = tabs.parentElement;
+    tabs.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    section.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    event.target.classList.add('active');
+    document.getElementById(id).classList.add('active');
+  }
+
+  function scrollToSection(id) {
+    document.getElementById(id).scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  const sections = document.querySelectorAll('section[id]');
+  const navBtns = document.querySelectorAll('nav .nav-btn');
+  const navObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navBtns.forEach(b => b.classList.remove('active'));
+        navBtns.forEach(b => {
+          if (b.getAttribute('onclick').includes("'" + entry.target.id + "'"))
+            b.classList.add('active');
+        });
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+  sections.forEach(s => navObserver.observe(s));
+
+  if (!window.matchMedia('(hover: hover)').matches) {
+    const cards = document.querySelectorAll('.card');
+    const cardObserver = new IntersectionObserver(entries => {
+      entries.forEach(e => { e.target.dataset.ratio = e.isIntersecting ? e.intersectionRatio : 0; });
+      let best = null, bestR = 0;
+      cards.forEach(c => { const r = parseFloat(c.dataset.ratio)||0; if (r > bestR) { bestR = r; best = c; } });
+      cards.forEach(c => c.classList.toggle('in-view', c === best && bestR > 0));
+    }, { threshold: [0, 0.25, 0.5, 0.75, 1] });
+    cards.forEach(c => cardObserver.observe(c));
+  }
+</script>
+</body>
+</html>

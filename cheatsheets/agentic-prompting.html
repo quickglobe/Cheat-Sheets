@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agentic Prompting Cheat Sheet</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+/* ── TOKENS ────────────────────────────────────────────────── */
+:root {
+  --bg:       #f5f6fa;
+  --surface:  #ffffff;
+  --surface2: #eef0f6;
+  --border:   #d5d8e3;
+  --text:       #2e3248;
+  --text-bright:#1a1c2b;
+  --text-dim:   #555970;
+  --accent:      #d63555;
+  --accent-glow: rgba(214,53,85,0.08);
+  --teal:        #0e8a72;
+  --teal-glow:   rgba(14,138,114,0.07);
+  --blue:        #3a6ae8;
+  --blue-glow:   rgba(58,106,232,0.07);
+  --gold:        #c48800;
+  --gold-glow:   rgba(196,136,0,0.07);
+  --radius:       10px;
+  --font-display: 'DM Serif Display', Georgia, serif;
+  --font-body:    'DM Sans', sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:       #111218;
+    --surface:  #1a1b26;
+    --surface2: #222433;
+    --border:   #33364a;
+    --text:       #c4c7d8;
+    --text-bright:#eceef6;
+    --text-dim:   #8b8faa;
+    --accent:      #f0506a;
+    --accent-glow: rgba(240,80,106,0.14);
+    --teal:        #2ec4a2;
+    --teal-glow:   rgba(46,196,162,0.1);
+    --blue:        #6b9aff;
+    --blue-glow:   rgba(107,154,255,0.1);
+    --gold:        #f5b731;
+    --gold-glow:   rgba(245,183,49,0.1);
+  }
+  nav    { background: rgba(17,18,24,0.88); }
+  thead  { background: var(--surface2); }
+  code   { color: var(--teal); }
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { overflow-x: hidden; width: 100%; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.65;
+  -webkit-text-size-adjust: 100%;
+  padding-top: 52px;
+}
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  height: 52px;
+  background: rgba(245,246,250,0.88);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+nav::-webkit-scrollbar { display: none; }
+.logo {
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--accent);
+  white-space: nowrap;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+.nav-btn {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  background: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: color 0.2s, background 0.2s;
+}
+.nav-btn:hover, .nav-btn.active {
+  color: var(--text-bright);
+  background: var(--surface2);
+}
+.container {
+  max-width: min(820px, 100%);
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+}
+.hero {
+  text-align: center;
+  padding: 48px 0 40px;
+  position: relative;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -60px; left: 50%;
+  transform: translateX(-50%);
+  width: min(500px, 100vw);
+  height: 400px;
+  background: radial-gradient(ellipse, rgba(214,53,85,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 6vw, 48px);
+  color: var(--text-bright);
+  letter-spacing: -0.5px;
+  margin-bottom: 12px;
+  position: relative;
+}
+.hero p {
+  color: var(--text-dim);
+  font-size: 16px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+section {
+  margin-top: 48px;
+  scroll-margin-top: 68px;
+}
+.section-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.8px;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.section-label::before {
+  content: '';
+  width: 18px; height: 2px;
+  background: var(--accent);
+  border-radius: 1px;
+}
+h2 {
+  font-family: var(--font-display);
+  font-size: 28px;
+  color: var(--text-bright);
+  margin-bottom: 16px;
+}
+h3 {
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--text-bright);
+  margin: 24px 0 10px;
+}
+p + p { margin-top: 10px; }
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px;
+  margin-top: 16px;
+}
+.card {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  transition: border-color 0.3s, box-shadow 0.3s, transform 0.2s;
+}
+@media (hover: hover) {
+  .card:hover {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+    transform: translateY(-2px);
+  }
+}
+@media (hover: none) {
+  .card.in-view {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+}
+.card .num {
+  font-family: var(--font-display);
+  font-size: 28px;
+  color: var(--accent);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.card strong { color: var(--text-bright); display: block; margin-bottom: 4px; }
+.card span   { font-size: 13.5px; color: var(--text-dim); }
+.table-wrap {
+  margin-top: 16px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  max-width: 100%;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  table-layout: fixed;
+  word-wrap: break-word;
+}
+thead { background: var(--surface2); }
+th {
+  text-align: left;
+  padding: 12px 16px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-bright);
+  border-bottom: 1px solid var(--border);
+}
+td {
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+tr:last-child td { border-bottom: none; }
+tr:nth-child(even) { background: color-mix(in srgb, var(--surface2) 40%, transparent); }
+code, .code-block {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  background: var(--surface2);
+  border-radius: 5px;
+}
+code {
+  padding: 2px 7px;
+  color: var(--teal);
+}
+.code-block {
+  display: block;
+  padding: 14px 18px;
+  margin: 10px 0;
+  color: var(--text);
+  border: 1px solid var(--border);
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.55;
+}
+.tip {
+  border-left: 3px solid var(--teal);
+  background: var(--teal-glow);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin: 16px 0;
+}
+.tip.blue { border-color: var(--blue); background: var(--blue-glow); }
+.tip.gold { border-color: var(--gold); background: var(--gold-glow); }
+.tip.red  { border-color: var(--accent); background: var(--accent-glow); }
+.tip-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  margin-bottom: 6px;
+}
+.tip      .tip-label { color: var(--teal); }
+.tip.blue .tip-label { color: var(--blue); }
+.tip.gold .tip-label { color: var(--gold); }
+.tip.red  .tip-label { color: var(--accent); }
+ul.styled { list-style: none; margin: 10px 0; }
+ul.styled li {
+  position: relative;
+  padding-left: 20px;
+  margin-bottom: 6px;
+}
+ul.styled li::before {
+  content: '›';
+  position: absolute;
+  left: 4px;
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.5;
+}
+.ba-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 16px;
+}
+.ba-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+.ba-box.after { border-color: var(--teal); }
+.ba-tag {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+  margin-bottom: 10px;
+}
+.ba-box:not(.after) .ba-tag { color: var(--text-dim); }
+.ba-box.after       .ba-tag { color: var(--teal); }
+.ba-box blockquote {
+  font-style: italic;
+  color: var(--text-dim);
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+.ba-box.after blockquote { color: var(--text); }
+.tabs { display: flex; gap: 4px; margin: 16px 0 0; flex-wrap: wrap; }
+.tab-btn {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.tab-btn:hover { color: var(--text-bright); border-color: var(--text-dim); }
+.tab-btn.active { color: var(--accent); border-color: var(--accent); background: var(--accent-glow); }
+.tab-panel { display: none; margin-top: 14px; }
+.tab-panel.active { display: block; }
+footer {
+  text-align: center;
+  padding: 40px 24px;
+  color: var(--text-dim);
+  font-size: 13px;
+  border-top: 1px solid var(--border);
+  margin-top: 56px;
+  word-break: break-word;
+}
+footer a { color: var(--accent); text-decoration: none; }
+@media (max-width: 600px) {
+  .ba-grid, .card-grid { grid-template-columns: 1fr; }
+  .container  { padding: 24px 16px 60px; }
+  nav         { padding: 0 12px; gap: 4px; }
+  .hero       { padding: 32px 0 28px; }
+  .hero h1    { font-size: 28px; }
+  h2          { font-size: 22px; }
+  table       { font-size: 13px; }
+  th, td      { padding: 9px 10px; }
+  .code-block { font-size: 12px; padding: 12px 14px; }
+  .tab-btn    { font-size: 12px; padding: 6px 12px; }
+}
+  </style>
+</head>
+<body>
+
+<nav>
+  <span class="logo">Agentic AI</span>
+  <button class="nav-btn" onclick="scrollToSection('mindset')">Mindset Shift</button>
+  <button class="nav-btn" onclick="scrollToSection('system-prompts')">System Prompts</button>
+  <button class="nav-btn" onclick="scrollToSection('context')">Context Engineering</button>
+  <button class="nav-btn" onclick="scrollToSection('tools')">Tool Design</button>
+  <button class="nav-btn" onclick="scrollToSection('patterns')">Agent Patterns</button>
+  <button class="nav-btn" onclick="scrollToSection('guardrails')">Guardrails</button>
+  <button class="nav-btn" onclick="scrollToSection('example')">Worked Example</button>
+</nav>
+
+<div class="container">
+
+  <div class="hero">
+    <h1>Agentic Prompting</h1>
+    <p>From chat interface to autonomous agents — for intermediate practitioners moving into agentic and API environments.</p>
+  </div>
+
+  <!-- ── SECTION 1: MINDSET SHIFT ── -->
+  <section id="mindset">
+    <div class="section-label">Section 01</div>
+    <h2>The Mindset Shift: Chat vs Agentic</h2>
+    <p>In a chat interface, you prompt once and read one response. In an agentic environment, the model plans, acts, observes results, and loops — often without you watching. This changes almost everything about how you write prompts.</p>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="num">1</div>
+        <strong>Statelessness by default</strong>
+        <span>Each API call is memoryless. Context — history, file contents, prior results — must be explicitly included every time. Nothing is "remembered" unless you pass it in.</span>
+      </div>
+      <div class="card">
+        <div class="num">2</div>
+        <strong>Multi-step, not single-shot</strong>
+        <span>Agents execute chains of actions across an indeterminate number of steps. A prompt is a standing instruction, not a one-off message. Errors compound — a wrong early step corrupts everything downstream.</span>
+      </div>
+      <div class="card">
+        <div class="num">3</div>
+        <strong>The model directs itself</strong>
+        <span>Unlike a workflow with hard-coded step A → B → C, an agent dynamically decides what to do next. Your prompt defines the goal and constraints; the model chooses the path.</span>
+      </div>
+      <div class="card">
+        <div class="num">4</div>
+        <strong>Actions have real consequences</strong>
+        <span>An agent can write files, call APIs, push code, send emails. Mistakes aren't just wrong words — they may be irreversible. Guardrails matter far more than in chat.</span>
+      </div>
+      <div class="card">
+        <div class="num">5</div>
+        <strong>Context is a finite resource</strong>
+        <span>The context window fills up as the agent works. Bloated context degrades performance (called "context rot"). You must actively manage what goes in and what gets trimmed.</span>
+      </div>
+      <div class="card">
+        <div class="num">6</div>
+        <strong>Tools are first-class citizens</strong>
+        <span>In chat you use tools opportunistically. In agentic systems, tool definitions, naming, and documentation are as important as the prompt itself — the model reads them as instructions.</span>
+      </div>
+    </div>
+
+    <h3>At a glance: Chat vs Agentic</h3>
+    <div class="table-wrap">
+      <table>
+        <colgroup>
+          <col style="width:30%">
+          <col style="width:35%">
+          <col style="width:35%">
+        </colgroup>
+        <thead>
+          <tr><th>Dimension</th><th>Chat Interface</th><th>Agentic / API</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Prompt scope</td><td>One-off message</td><td>Standing system instruction</td></tr>
+          <tr><td>Memory</td><td>Maintained by the UI</td><td>You manage explicitly</td></tr>
+          <tr><td>Error recovery</td><td>You correct manually</td><td>Agent re-plans (or fails silently)</td></tr>
+          <tr><td>Iteration speed</td><td>Seconds per loop</td><td>Minutes to hours per run</td></tr>
+          <tr><td>Side effects</td><td>Text only</td><td>File writes, API calls, code execution</td></tr>
+          <tr><td>Context growth</td><td>UI handles pruning</td><td>Your responsibility</td></tr>
+          <tr><td>Tool use</td><td>Optional, opportunistic</td><td>Core, carefully designed</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tip blue">
+      <div class="tip-label">From your existing skills</div>
+      The techniques you already know — few-shot examples, chain-of-thought, role assignment, output scaffolding — all still apply in agentic contexts. This sheet covers the <em>new</em> layer on top: system design, context management, and tool architecture.
+    </div>
+  </section>
+
+  <!-- ── SECTION 2: SYSTEM PROMPTS ── -->
+  <section id="system-prompts">
+    <div class="section-label">Section 02</div>
+    <h2>Writing System Prompts for Agents</h2>
+    <p>A system prompt in an agentic context is not a polite opener — it is the agent's operating manual. It runs at every turn, consumes tokens every time, and sets the boundaries of everything the agent will do.</p>
+
+    <h3>The "right altitude" principle</h3>
+    <p>Anthropic describes an optimal system prompt as sitting in a Goldilocks zone between two failure modes:</p>
+
+    <div class="ba-grid">
+      <div class="ba-box">
+        <div class="ba-tag">Too prescriptive</div>
+        <blockquote>Hardcoded if-else logic in the prompt. Brittle — breaks on any case you didn't anticipate. Hard to maintain. Leaves no room for the model's reasoning.</blockquote>
+      </div>
+      <div class="ba-box after">
+        <div class="ba-tag">Right altitude</div>
+        <blockquote>Clear goal + strong heuristics + concrete examples. Specific enough to guide behaviour; flexible enough to handle novel situations. The model fills the gaps with good judgement.</blockquote>
+      </div>
+    </div>
+
+    <div class="tip red">
+      <div class="tip-label">Also too vague</div>
+      "Help the user with their task." A system prompt so general that the model has no constraints or concrete signals is equally dangerous — especially when the agent can take real-world actions.
+    </div>
+
+    <h3>Recommended structure</h3>
+    <p>Use XML tags or Markdown headers to separate concerns. The model parses structure, not just words.</p>
+    <div class="code-block">&lt;background_information&gt;
+You are a coding agent working inside a GitHub repository.
+The repo is a static site built with plain HTML/CSS.
+&lt;/background_information&gt;
+
+&lt;instructions&gt;
+Your job is to implement feature requests from the user.
+Always read the relevant file before editing it.
+Make the smallest change that achieves the goal.
+&lt;/instructions&gt;
+
+## Tool guidance
+Use `read_file` before any edit. Use `write_file` only after
+confirming the plan. Never delete files without asking first.
+
+## Output description
+After each action, summarise what you did in one sentence.</div>
+
+    <h3>System prompt checklist</h3>
+    <div class="card-grid">
+      <div class="card">
+        <div class="num">✓</div>
+        <strong>State the agent's role and environment</strong>
+        <span>What is it? Where does it operate? What can it see? Don't assume shared context — it has none.</span>
+      </div>
+      <div class="card">
+        <div class="num">✓</div>
+        <strong>Define the goal, not the procedure</strong>
+        <span>Tell the agent what success looks like. Let it choose the steps. Only prescribe steps when a specific order is genuinely necessary.</span>
+      </div>
+      <div class="card">
+        <div class="num">✓</div>
+        <strong>Explicit tool guidance</strong>
+        <span>Name which tools to prefer, when to use them, and when not to. Agents won't guess your conventions.</span>
+      </div>
+      <div class="card">
+        <div class="num">✓</div>
+        <strong>Output format requirements</strong>
+        <span>What should the agent produce or report after each step? A one-line summary? A JSON object? Specify it.</span>
+      </div>
+      <div class="card">
+        <div class="num">✓</div>
+        <strong>Hard stops and escalation rules</strong>
+        <span>"If you are about to delete a file, stop and ask the user." Irreversible actions need explicit checkpoints.</span>
+      </div>
+      <div class="card">
+        <div class="num">✓</div>
+        <strong>Start minimal, expand on failure</strong>
+        <span>Test the shortest viable system prompt first. Add instructions only when you observe specific failure modes — not preemptively.</span>
+      </div>
+    </div>
+
+    <div class="tip">
+      <div class="tip-label">Pro Tip</div>
+      Use capitalization or emphasis sparingly for truly critical rules: <em>"ALWAYS read a file before editing it"</em> or <em>"NEVER delete without confirmation."</em> Real-world agent prompts like Cline and Bolt use "ULTRA IMPORTANT" for their hardest constraints. Use it too liberally and it loses meaning.
+    </div>
+  </section>
+
+  <!-- ── SECTION 3: CONTEXT ENGINEERING ── -->
+  <section id="context">
+    <div class="section-label">Section 03</div>
+    <h2>Context Engineering</h2>
+    <p>Context engineering is Anthropic's term for the natural evolution of prompt engineering. Where prompt engineering asks "how should I word this?", context engineering asks "what is the optimal set of tokens to give the model at this moment?" The distinction matters because agents accumulate context over time — and too much context degrades performance.</p>
+
+    <div class="tip blue">
+      <div class="tip-label">Context rot</div>
+      Research shows that as the number of tokens in the context window grows, models' ability to accurately use information from earlier in that context decreases — a phenomenon called <strong>context rot</strong>. Context is a finite resource with diminishing returns; treat it like working memory, not a filing cabinet.
+    </div>
+
+    <h3>What lives in context?</h3>
+    <div class="table-wrap">
+      <table>
+        <colgroup>
+          <col style="width:28%">
+          <col style="width:44%">
+          <col style="width:28%">
+        </colgroup>
+        <thead>
+          <tr><th>Context component</th><th>Best practice</th><th>Common mistake</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>System prompt</strong></td>
+            <td>Clear, minimal, structured with XML or Markdown headers. Start short, add only on observed failures.</td>
+            <td>Dumping every edge case into it upfront; creates noise and bloat.</td>
+          </tr>
+          <tr>
+            <td><strong>Tool definitions</strong></td>
+            <td>Crisp names, unambiguous descriptions, carefully typed parameters. No overlapping tools.</td>
+            <td>Too many tools; ambiguous which to use; parameter names that don't explain themselves.</td>
+          </tr>
+          <tr>
+            <td><strong>Few-shot examples</strong></td>
+            <td>A small set of diverse, canonical examples that cover the expected behaviour. Quality over quantity.</td>
+            <td>Listing every edge case you can think of; balloons context without proportional benefit.</td>
+          </tr>
+          <tr>
+            <td><strong>Message history</strong></td>
+            <td>Summarise or prune older turns. Keep recent, high-signal turns. Use prompt caching for static parts.</td>
+            <td>Sending the full unedited history for every API call; context fills up fast.</td>
+          </tr>
+          <tr>
+            <td><strong>Retrieved data (RAG)</strong></td>
+            <td>Load data just-in-time via tools rather than pre-loading everything upfront.</td>
+            <td>Injecting entire files or databases into context when only a fragment is needed.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Just-in-time context loading</h3>
+    <p>Rather than pre-loading all potentially relevant data into the initial context, design agents to fetch data on demand using tools — file reads, database queries, web fetches. This mirrors human cognition: we don't memorise entire codebases; we open the file we need.</p>
+
+    <div class="code-block"><!-- Instead of loading the full repo into the system prompt: -->
+
+Tool: read_file(path)
+→ Agent reads only the specific file it needs, when it needs it.
+
+Tool: search_codebase(query)
+→ Agent finds and loads only the relevant snippet.
+
+Result: context stays lean throughout the run.</div>
+
+    <div class="tip">
+      <div class="tip-label">Pro Tip</div>
+      Prompt caching (available via Anthropic's API) lets you cache static context — like a long system prompt or reference document — so the model doesn't reprocess it on every turn. This cuts both latency and cost significantly for long-running agents.
+    </div>
+  </section>
+
+  <!-- ── SECTION 4: TOOL DESIGN ── -->
+  <section id="tools">
+    <div class="section-label">Section 04</div>
+    <h2>Designing Tools Well</h2>
+    <p>Tools are the agent's interface with the real world. Poor tool design is one of the most common causes of agent failure — not because the model is incapable, but because it can't use tools it doesn't understand. Think of tool documentation the way you'd think of API documentation for a developer colleague.</p>
+
+    <div class="tip blue">
+      <div class="tip-label">What is MCP?</div>
+      The <strong>Model Context Protocol (MCP)</strong> is an open standard introduced by Anthropic for connecting agents to external tools and data sources. It defines a consistent way for agents to discover and call tools — think of it as a universal adapter. Claude Desktop, Claude Code, and many third-party agents support MCP out of the box.
+    </div>
+
+    <h3>Anatomy of a well-designed tool</h3>
+    <div class="code-block">Tool name:        read_file
+Description:      Read the full contents of a file at the given absolute path.
+                  Use this before editing any file. Returns the file content as a string.
+                  Do NOT use for binary files.
+Parameters:
+  path  (string, required)  Absolute path to the file, e.g. /home/user/project/index.html
+Returns:          String content of the file, or an error message if not found.</div>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="num">1</div>
+        <strong>Names should be verbs</strong>
+        <span>Use <code>read_file</code>, not <code>file</code>. Use <code>search_web</code>, not <code>web</code>. The model picks tools by name — make the action obvious.</span>
+      </div>
+      <div class="card">
+        <div class="num">2</div>
+        <strong>Descriptions tell when to use it</strong>
+        <span>Include "Use this when…" and "Do NOT use for…" in the description. The model decides which tool to call based on this text alone.</span>
+      </div>
+      <div class="card">
+        <div class="num">3</div>
+        <strong>Parameters should be self-explanatory</strong>
+        <span>Prefer <code>absolute_path</code> over <code>path</code>. Prefer <code>max_results_count</code> over <code>n</code>. Ambiguous parameters cause incorrect calls.</span>
+      </div>
+      <div class="card">
+        <div class="num">4</div>
+        <strong>Minimal viable toolset</strong>
+        <span>If a human can't immediately say which tool applies in a given situation, an agent can't either. Prune overlapping tools. A bloated toolset confuses the model.</span>
+      </div>
+      <div class="card">
+        <div class="num">5</div>
+        <strong>Token-efficient responses</strong>
+        <span>Tool responses consume context on every call. Return only what's needed — summarise long outputs, paginate large datasets, truncate at a sensible limit (e.g. 25,000 tokens).</span>
+      </div>
+      <div class="card">
+        <div class="num">6</div>
+        <strong>Fail gracefully with useful errors</strong>
+        <span>Return structured error messages the model can act on: <em>"File not found at /path — did you mean /other/path?"</em> Cryptic errors cause the agent to loop or hallucinate.</span>
+      </div>
+    </div>
+
+    <div class="tip red">
+      <div class="tip-label">Watch Out</div>
+      One of the most common agentic failures is an overlapping toolset — two tools that could plausibly apply to the same situation. The agent will either pick the wrong one or alternate between them. Audit your tools: if any two have similar descriptions, merge or rename them.
+    </div>
+  </section>
+
+  <!-- ── SECTION 5: AGENT PATTERNS ── -->
+  <section id="patterns">
+    <div class="section-label">Section 05</div>
+    <h2>Agent Architecture Patterns</h2>
+    <p>Most agentic systems combine a handful of recurring patterns. Knowing these lets you choose the right structure for your task and prompt accordingly.</p>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="showTab(event, 'tab-single')">Single Agent</button>
+      <button class="tab-btn" onclick="showTab(event, 'tab-orchestrator')">Orchestrator-Workers</button>
+      <button class="tab-btn" onclick="showTab(event, 'tab-evaluator')">Evaluator-Optimizer</button>
+      <button class="tab-btn" onclick="showTab(event, 'tab-planact')">Plan + Act Modes</button>
+    </div>
+
+    <div id="tab-single" class="tab-panel active">
+      <p><strong>When:</strong> Tasks that fit in one context window and don't require delegation. Your first choice for simple agentic tasks.</p>
+      <ul class="styled">
+        <li>One model with a defined toolset, loops until task is complete or it hits a checkpoint.</li>
+        <li>Easiest to debug — all state is in one place.</li>
+        <li>Good for: code edits, file transforms, web research, building a simple static website.</li>
+      </ul>
+      <div class="tip gold">
+        <div class="tip-label">When to use</div>
+        Start here. Only move to multi-agent patterns when a single agent genuinely can't handle the complexity or scale of the task.
+      </div>
+    </div>
+
+    <div id="tab-orchestrator" class="tab-panel">
+      <p><strong>When:</strong> Tasks whose complexity is unpredictable or too large for one context window. The orchestrator breaks the task into subtasks and delegates to worker agents.</p>
+      <ul class="styled">
+        <li><strong>Orchestrator</strong> — receives the top-level goal, plans subtasks, assigns them to workers.</li>
+        <li><strong>Workers</strong> — specialised agents, each with a focused toolset and narrow system prompt.</li>
+        <li>Workers report results back; orchestrator integrates them and decides the next step.</li>
+        <li>Example: a GitHub issue involves 5 files across 3 directories — orchestrator assigns one worker per file cluster.</li>
+      </ul>
+      <div class="tip">
+        <div class="tip-label">Pro Tip</div>
+        Give each worker a minimal, purpose-specific system prompt. A worker that edits CSS should not have tools or instructions for running tests. Narrow scope = fewer errors.
+      </div>
+    </div>
+
+    <div id="tab-evaluator" class="tab-panel">
+      <p><strong>When:</strong> The quality of the output matters more than speed, and "good enough" on the first pass is not acceptable — writing, code review, translation quality.</p>
+      <ul class="styled">
+        <li><strong>Generator</strong> — produces the initial output.</li>
+        <li><strong>Evaluator</strong> — independently scores or critiques it against defined criteria.</li>
+        <li>Loop repeats until the evaluator passes the output or a max iteration count is hit.</li>
+        <li>The evaluator can be the same model with a different system prompt, or a separate one.</li>
+      </ul>
+      <div class="tip red">
+        <div class="tip-label">Watch Out</div>
+        Without a maximum iteration limit, evaluator-optimizer loops can run indefinitely. Always set a hard cap (e.g., 3–5 rounds) and define what "good enough" means explicitly in the evaluator's prompt.
+      </div>
+    </div>
+
+    <div id="tab-planact" class="tab-panel">
+      <p><strong>When:</strong> Tasks where rushing into action before thinking causes cascading mistakes. Used in production agents like Cline (the VS Code coding agent).</p>
+      <ul class="styled">
+        <li><strong>Plan mode</strong> — agent analyses the problem and writes a step-by-step plan. No tools are called. User reviews and approves.</li>
+        <li><strong>Act mode</strong> — agent executes the approved plan, one step at a time.</li>
+        <li>Each step waits for confirmation before proceeding to the next.</li>
+        <li>Dramatically reduces compounding errors on complex, multi-file tasks.</li>
+      </ul>
+      <div class="tip">
+        <div class="tip-label">Pro Tip</div>
+        Even if you don't formally implement Plan/Act modes, you can mimic this with prompting: <em>"Before taking any action, output your full plan. Wait for my approval before proceeding."</em>
+      </div>
+    </div>
+
+    <h3>Choosing the right pattern</h3>
+    <div class="table-wrap">
+      <table>
+        <colgroup>
+          <col style="width:30%">
+          <col style="width:40%">
+          <col style="width:30%">
+        </colgroup>
+        <thead>
+          <tr><th>Pattern</th><th>Best for</th><th>Main risk</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Single agent</td><td>Contained, well-scoped tasks</td><td>Context window overflow</td></tr>
+          <tr><td>Orchestrator-Workers</td><td>Large, parallel, or unpredictable tasks</td><td>Coordination overhead</td></tr>
+          <tr><td>Evaluator-Optimizer</td><td>Quality-sensitive outputs</td><td>Infinite loops without a cap</td></tr>
+          <tr><td>Plan + Act</td><td>Complex, multi-step, risky actions</td><td>Slower; needs user patience</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ── SECTION 6: GUARDRAILS ── -->
+  <section id="guardrails">
+    <div class="section-label">Section 06</div>
+    <h2>Guardrails &amp; Human Control</h2>
+    <p>The more autonomy you give an agent, the more important guardrails become. Autonomous action without oversight is how small mistakes become expensive ones.</p>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="num">1</div>
+        <strong>Checkpoint before irreversible actions</strong>
+        <span>Deleting files, pushing to main, sending emails, writing to a database — any action that can't be easily undone needs an explicit pause for human review.</span>
+      </div>
+      <div class="card">
+        <div class="num">2</div>
+        <strong>One tool call per turn (where possible)</strong>
+        <span>Requiring confirmation after each tool use creates a feedback loop. It prevents cascading failures and lets you catch problems before they compound.</span>
+      </div>
+      <div class="card">
+        <div class="num">3</div>
+        <strong>Hard limits in the system prompt</strong>
+        <span>Be explicit: <em>"Do not modify any file outside /project/src"</em>. <em>"Do not call any external API not listed here."</em> Agents will explore the full space you give them.</span>
+      </div>
+      <div class="card">
+        <div class="num">4</div>
+        <strong>Least-privilege tools</strong>
+        <span>Only give the agent the tools it actually needs for this task. A read-only research agent should not have a write_file tool. Scope tools to the job.</span>
+      </div>
+      <div class="card">
+        <div class="num">5</div>
+        <strong>Explicit escalation path</strong>
+        <span>Define when the agent should stop and ask rather than proceed. <em>"If you are uncertain about the intent of a request, ask before acting."</em> Ambiguity is the enemy of safe autonomy.</span>
+      </div>
+      <div class="card">
+        <div class="num">6</div>
+        <strong>Dry-run mode for testing</strong>
+        <span>During development, prompt the agent to describe what it <em>would</em> do without actually doing it. Audit the plan before letting it loose on real files or APIs.</span>
+      </div>
+    </div>
+
+    <div class="tip">
+      <div class="tip-label">Pro Tip — Minimal footprint principle</div>
+      Anthropic's guidance for safe agents: request only necessary permissions, avoid storing sensitive information beyond immediate needs, prefer reversible over irreversible actions, and err on the side of doing less and confirming when uncertain about intended scope.
+    </div>
+
+    <h3>Trust levels in multi-agent systems</h3>
+    <p>When one agent sends instructions to another, the receiving agent has no way to verify those instructions are legitimate. Apply the same scrutiny to agent-generated instructions that you would to user input.</p>
+    <div class="tip red">
+      <div class="tip-label">Prompt Injection Risk</div>
+      An agent that reads external content (web pages, emails, documents) can be tricked by malicious text in that content instructing it to take unexpected actions. Always treat externally-sourced content as untrusted data, not trusted instructions.
+    </div>
+  </section>
+
+  <!-- ── SECTION 7: WORKED EXAMPLE ── -->
+  <section id="example">
+    <div class="section-label">Section 07</div>
+    <h2>Worked Example: GitHub Pages Site</h2>
+    <p>You want an agent to build and maintain a simple static website hosted on GitHub Pages. Here's how to apply everything in this sheet to that real task.</p>
+
+    <h3>Step 1 — System prompt (minimal first pass)</h3>
+    <div class="code-block">&lt;background_information&gt;
+You are a coding agent working on a static website repository.
+The site uses plain HTML, CSS, and optional vanilla JavaScript.
+It will be hosted on GitHub Pages from the /docs folder on the main branch.
+File structure:
+  /docs/index.html      ← main page
+  /docs/style.css       ← stylesheet
+  /docs/assets/         ← images and other static files
+&lt;/background_information&gt;
+
+&lt;instructions&gt;
+Implement the user's requested changes to the site.
+Before editing any file, read it first with read_file.
+Make the smallest change that achieves the goal.
+After completing a change, summarise what you did in one sentence
+and list any files modified.
+&lt;/instructions&gt;
+
+## Hard limits
+- Only modify files inside /docs/
+- Do not commit or push; only write files locally
+- If asked to delete a file, confirm with the user first</div>
+
+    <h3>Step 2 — Tool definitions</h3>
+    <div class="table-wrap">
+      <table>
+        <colgroup>
+          <col style="width:30%">
+          <col style="width:70%">
+        </colgroup>
+        <thead>
+          <tr><th>Tool name</th><th>Description (what you'd write)</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>read_file</code></td>
+            <td>Read the full text content of a file at the given absolute path. Use this before any edit. Do NOT use for binary/image files.</td>
+          </tr>
+          <tr>
+            <td><code>write_file</code></td>
+            <td>Write or overwrite a file at the given absolute path with the provided content. Always read the file first. Only use within /docs/.</td>
+          </tr>
+          <tr>
+            <td><code>list_directory</code></td>
+            <td>List all files and directories at the given absolute path, one level deep. Use to explore the project structure before making assumptions.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Step 3 — Example user messages (what to say)</h3>
+    <div class="code-block">✓ Good — specific and scoped:
+"Add a navigation bar to index.html with links to Home, About, and Contact.
+ Style it in style.css to match the existing colour scheme.
+ Do not change any other part of the page."
+
+✓ Good — with a constraint:
+"Update the hero section background colour to #1a1a2e.
+ Only change the background-color property — do not refactor any other styles."
+
+✗ Vague — avoid:
+"Make the site look better."
+
+✗ Too broad — avoid:
+"Redesign the whole thing with a modern aesthetic."</div>
+
+    <h3>Step 4 — Using Plan + Act for bigger changes</h3>
+    <div class="code-block">User message:
+"I want to add a blog section with an index page and three initial posts.
+ Before doing anything, write out your full plan — what files you'll create,
+ what changes you'll make to index.html, and in what order.
+ Do not create any files until I approve the plan."
+
+→ Agent outputs its plan.
+→ You review, correct if needed, then say: "Approved — go ahead."
+→ Agent executes one file at a time, reporting after each.</div>
+
+    <div class="tip">
+      <div class="tip-label">Pro Tip — GitHub workflow</div>
+      Keep the agent working on a feature branch, not main. Instruct it explicitly: <em>"Assume you are on a branch called feature/blog. Do not reference or modify main."</em> Review the diff in a pull request before merging — this is your final human checkpoint.
+    </div>
+
+    <div class="tip gold">
+      <div class="tip-label">When you're ready to go further</div>
+      Once comfortable with a single-agent file-editing loop, the natural next steps are: (1) adding a <code>run_command</code> tool so the agent can run build scripts; (2) connecting GitHub via MCP to let the agent create PRs and read issues; (3) introducing an evaluator agent that checks HTML validity and accessibility after each change.
+    </div>
+  </section>
+
+</div><!-- /.container -->
+
+<footer>
+  Agentic Prompting Cheat Sheet · Built with Claude · May 2026<br>
+  <a href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents" target="_blank">Anthropic: Effective Context Engineering</a> ·
+  <a href="https://www.anthropic.com/research/building-effective-agents" target="_blank">Anthropic: Building Effective Agents</a> ·
+  <a href="https://docs.claude.com/en/docs/build-with-claude/prompt-engineering/overview" target="_blank">Anthropic Prompt Engineering Docs</a>
+</footer>
+
+<script>
+  function showTab(event, id) {
+    const tabs = event.target.closest('.tabs');
+    const section = tabs.parentElement;
+    tabs.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    section.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    event.target.classList.add('active');
+    document.getElementById(id).classList.add('active');
+  }
+
+  function scrollToSection(id) {
+    document.getElementById(id).scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  const sections = document.querySelectorAll('section[id]');
+  const navBtns = document.querySelectorAll('nav .nav-btn');
+  const navObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navBtns.forEach(b => b.classList.remove('active'));
+        navBtns.forEach(b => {
+          if (b.getAttribute('onclick').includes("'" + entry.target.id + "'"))
+            b.classList.add('active');
+        });
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+  sections.forEach(s => navObserver.observe(s));
+
+  if (!window.matchMedia('(hover: hover)').matches) {
+    const cards = document.querySelectorAll('.card');
+    const cardObserver = new IntersectionObserver(entries => {
+      entries.forEach(e => { e.target.dataset.ratio = e.isIntersecting ? e.intersectionRatio : 0; });
+      let best = null, bestR = 0;
+      cards.forEach(c => { const r = parseFloat(c.dataset.ratio)||0; if (r > bestR) { bestR = r; best = c; } });
+      cards.forEach(c => c.classList.toggle('in-view', c === best && bestR > 0));
+    }, { threshold: [0, 0.25, 0.5, 0.75, 1] });
+    cards.forEach(c => cardObserver.observe(c));
+  }
+</script>
+</body>
+</html>
