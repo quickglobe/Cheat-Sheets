@@ -4,15 +4,101 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cheatsheets</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23d63555'/%3E%3Cpath d='M8 8l10 8-10 8' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3Cline x1='20' y1='24' x2='26' y2='24' stroke='white' stroke-width='3.5' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="cheatsheets/cheatsheet.css">
+  <style>
+    a.sheet-card {
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+    a.sheet-card .card {
+      height: 100%;
+      cursor: pointer;
+    }
+    .card .tag {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 1.4px;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+    .card h3 {
+      margin: 0 0 6px;
+      font-size: 16px;
+    }
+    .card p {
+      font-size: 13.5px;
+      color: var(--text-dim);
+      line-height: 1.55;
+    }
+  </style>
 </head>
 <body>
-  <h1>Cheatsheets</h1>
-  <ul>
-    <li><a href="cheatsheets/prompting.html">AI Prompting Skills</a></li>
-    <li><a href="cheatsheets/agentic-prompting.html">Agentic Prompting</a></li>
-    <li><a href="cheatsheets/llm-reasoning.html">LLM Reasoning vs Non-Reasoning Models</a></li>
-    <li><a href="cheatsheets/bash.html">Bash Scripting Basics</a></li>
-    <li><a href="cheatsheets/tailscale-vpn.html">Tailscale vs Traditional VPN</a></li>
-  </ul>
+
+<nav>
+  <span class="logo">Cheatsheets</span>
+</nav>
+
+<div class="container">
+
+  <div class="hero">
+    <h1>Cheatsheets</h1>
+    <p>Quick-reference guides on AI, the command line, and networking — each one a single interactive page.</p>
+  </div>
+
+  <div class="card-grid">
+
+    <a href="cheatsheets/prompting.html" class="sheet-card">
+      <div class="card">
+        <div class="tag">AI</div>
+        <h3>AI Prompting Skills</h3>
+        <p>Six golden rules, prompt anatomy, tone styles, few-shot and chain-of-thought techniques, and a before/after example walk-through.</p>
+      </div>
+    </a>
+
+    <a href="cheatsheets/agentic-prompting.html" class="sheet-card">
+      <div class="card">
+        <div class="tag">Agents</div>
+        <h3>Agentic Prompting</h3>
+        <p>From chat to autonomous agents — system prompt design, tool documentation, context engineering, and avoiding common failure modes.</p>
+      </div>
+    </a>
+
+    <a href="cheatsheets/llm-reasoning.html" class="sheet-card">
+      <div class="card">
+        <div class="tag">LLM</div>
+        <h3>LLM Reasoning vs Non-Reasoning</h3>
+        <p>When to use reasoning models vs scaling up model size, crossover decisions for the Claude 4.x family, and hybrid pipeline patterns.</p>
+      </div>
+    </a>
+
+    <a href="cheatsheets/bash.html" class="sheet-card">
+      <div class="card">
+        <div class="tag">CLI</div>
+        <h3>CLI Cheat Sheet</h3>
+        <p>Windows Command Prompt and Linux terminal commands side by side — navigation, file operations, search, and common gotchas when switching.</p>
+      </div>
+    </a>
+
+    <a href="cheatsheets/tailscale-vpn.html" class="sheet-card">
+      <div class="card">
+        <div class="tag">Networking</div>
+        <h3>VPN &amp; Tailscale</h3>
+        <p>How traditional hub-and-spoke VPNs work, how Tailscale's mesh model differs, protocol trade-offs, and when to use each approach.</p>
+      </div>
+    </a>
+
+  </div>
+
+</div>
+
+<footer>
+  Built with <a href="https://claude.ai">Claude</a> using the cheatsheet-builder skill &mdash; a shared design system across all pages.
+</footer>
+
 </body>
 </html>
