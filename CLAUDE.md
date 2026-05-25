@@ -40,7 +40,7 @@ All cheatsheets are built with the `cheatsheet-builder` Claude skill. The skill 
 4. Strip the `<style>` block from the downloaded file
 5. Add `<link rel="stylesheet" href="cheatsheet.css">` in its place (alongside the Google Fonts link)
 6. Save it to `cheatsheets/<slug>.html`
-7. Add a link to `index.html`
+7. Add an `a.sheet-card` panel to the `.card-grid` in `index.html` (tag, title, one-sentence description)
 8. Update the table in `README.md`
 
 ## Editing the Design System
@@ -53,7 +53,9 @@ When asked to modify a cheatsheet's content, edit the HTML file directly. Do not
 
 ## index.html
 
-The index is intentionally minimal — plain HTML, no styling. Frontend design for the index is out of scope until explicitly requested.
+The index uses the shared `cheatsheets/cheatsheet.css` stylesheet (linked as `href="cheatsheets/cheatsheet.css"`). It has a nav bar, a hero section, and a `.card-grid` of clickable panels — one per cheatsheet. Each card uses a `.tag` label (mono font, accent colour), an `<h3>` title, and a `<p>` description. Anchor tags (`a.sheet-card`) wrap each `.card`; a small inline `<style>` block handles the link-reset and `.tag` / `p` overrides that are index-specific.
+
+When adding a new cheatsheet, add a corresponding `a.sheet-card` block to the grid in `index.html`.
 
 ## What Not to Do
 
