@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VPN & Tailscale Cheat Sheet</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔒</text></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+/* ── TOKENS ────────────────────────────────────────────────── */
+:root {
+  --bg:       #f5f6fa;
+  --surface:  #ffffff;
+  --surface2: #eef0f6;
+  --border:   #d5d8e3;
+  --text:       #2e3248;
+  --text-bright:#1a1c2b;
+  --text-dim:   #555970;
+  --accent:      #d63555;
+  --accent-glow: rgba(214,53,85,0.08);
+  --teal:        #0e8a72;
+  --teal-glow:   rgba(14,138,114,0.07);
+  --blue:        #3a6ae8;
+  --blue-glow:   rgba(58,106,232,0.07);
+  --gold:        #c48800;
+  --gold-glow:   rgba(196,136,0,0.07);
+  --radius:       10px;
+  --font-display: 'DM Serif Display', Georgia, serif;
+  --font-body:    'DM Sans', sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:       #111218;
+    --surface:  #1a1b26;
+    --surface2: #222433;
+    --border:   #33364a;
+    --text:       #c4c7d8;
+    --text-bright:#eceef6;
+    --text-dim:   #8b8faa;
+    --accent:      #f0506a;
+    --accent-glow: rgba(240,80,106,0.14);
+    --teal:        #2ec4a2;
+    --teal-glow:   rgba(46,196,162,0.1);
+    --blue:        #6b9aff;
+    --blue-glow:   rgba(107,154,255,0.1);
+    --gold:        #f5b731;
+    --gold-glow:   rgba(245,183,49,0.1);
+  }
+  nav    { background: rgba(17,18,24,0.88); }
+  thead  { background: var(--surface2); }
+  code   { color: var(--teal); }
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { overflow-x: hidden; width: 100%; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.65;
+  -webkit-text-size-adjust: 100%;
+  padding-top: 52px;
+}
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  height: 52px;
+  background: rgba(245,246,250,0.88);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+nav::-webkit-scrollbar { display: none; }
+.logo {
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--accent);
+  white-space: nowrap;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+.nav-btn {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  background: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: color 0.2s, background 0.2s;
+}
+.nav-btn:hover, .nav-btn.active {
+  color: var(--text-bright);
+  background: var(--surface2);
+}
+.container {
+  max-width: min(820px, 100%);
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+}
+.hero {
+  text-align: center;
+  padding: 48px 0 40px;
+  position: relative;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -60px; left: 50%;
+  transform: translateX(-50%);
+  width: min(500px, 100vw);
+  height: 400px;
+  background: radial-gradient(ellipse, rgba(214,53,85,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 6vw, 48px);
+  color: var(--text-bright);
+  letter-spacing: -0.5px;
+  margin-bottom: 12px;
+  position: relative;
+}
+.hero p {
+  color: var(--text-dim);
+  font-size: 16px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+section {
+  margin-top: 48px;
+  scroll-margin-top: 68px;
+}
+.section-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.8px;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.section-label::before {
+  content: '';
+  width: 18px; height: 2px;
+  background: var(--accent);
+  border-radius: 1px;
+}
+h2 {
+  font-family: var(--font-display);
+  font-size: 28px;
+  color: var(--text-bright);
+  margin-bottom: 16px;
+}
+h3 {
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--text-bright);
+  margin: 24px 0 10px;
+}
+p + p { margin-top: 10px; }
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px;
+  margin-top: 16px;
+}
+.card {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  transition: border-color 0.3s, box-shadow 0.3s, transform 0.2s;
+}
+@media (hover: hover) {
+  .card:hover {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+    transform: translateY(-2px);
+  }
+}
+@media (hover: none) {
+  .card.in-view {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+}
+.card .num {
+  font-family: var(--font-display);
+  font-size: 28px;
+  color: var(--accent);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.card strong { color: var(--text-bright); display: block; margin-bottom: 4px; }
+.card span   { font-size: 13.5px; color: var(--text-dim); }
+.table-wrap {
+  margin-top: 16px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  max-width: 100%;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  table-layout: fixed;
+  word-wrap: break-word;
+}
+thead { background: var(--surface2); }
+th {
+  text-align: left;
+  padding: 12px 16px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-bright);
+  border-bottom: 1px solid var(--border);
+}
+td {
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+tr:last-child td { border-bottom: none; }
+tr:nth-child(even) { background: color-mix(in srgb, var(--surface2) 40%, transparent); }
+code, .code-block {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  background: var(--surface2);
+  border-radius: 5px;
+}
+code {
+  padding: 2px 7px;
+  color: var(--teal);
+}
+.code-block {
+  display: block;
+  padding: 14px 18px;
+  margin: 10px 0;
+  color: var(--text);
+  border: 1px solid var(--border);
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.55;
+}
+.tip {
+  border-left: 3px solid var(--teal);
+  background: var(--teal-glow);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin: 16px 0;
+}
+.tip.blue { border-color: var(--blue); background: var(--blue-glow); }
+.tip.gold { border-color: var(--gold); background: var(--gold-glow); }
+.tip.red  { border-color: var(--accent); background: var(--accent-glow); }
+.tip-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  margin-bottom: 6px;
+}
+.tip      .tip-label { color: var(--teal); }
+.tip.blue .tip-label { color: var(--blue); }
+.tip.gold .tip-label { color: var(--gold); }
+.tip.red  .tip-label { color: var(--accent); }
+ul.styled { list-style: none; margin: 10px 0; }
+ul.styled li {
+  position: relative;
+  padding-left: 20px;
+  margin-bottom: 6px;
+}
+ul.styled li::before {
+  content: '›';
+  position: absolute;
+  left: 4px;
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.5;
+}
+.ba-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 16px;
+}
+.ba-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+.ba-box.after { border-color: var(--teal); }
+.ba-tag {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+  margin-bottom: 10px;
+}
+.ba-box:not(.after) .ba-tag { color: var(--text-dim); }
+.ba-box.after       .ba-tag { color: var(--teal); }
+.ba-box blockquote {
+  font-style: italic;
+  color: var(--text-dim);
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+.ba-box.after blockquote { color: var(--text); }
+.tabs { display: flex; gap: 4px; margin: 16px 0 0; flex-wrap: wrap; }
+.tab-btn {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.tab-btn:hover { color: var(--text-bright); border-color: var(--text-dim); }
+.tab-btn.active { color: var(--accent); border-color: var(--accent); background: var(--accent-glow); }
+.tab-panel { display: none; margin-top: 14px; }
+.tab-panel.active { display: block; }
+footer {
+  text-align: center;
+  padding: 40px 24px;
+  color: var(--text-dim);
+  font-size: 13px;
+  border-top: 1px solid var(--border);
+  margin-top: 56px;
+  word-break: break-word;
+}
+footer a { color: var(--accent); text-decoration: none; }
+@media (max-width: 600px) {
+  .ba-grid, .card-grid { grid-template-columns: 1fr; }
+  .container  { padding: 24px 16px 60px; }
+  nav         { padding: 0 12px; gap: 4px; }
+  .hero       { padding: 32px 0 28px; }
+  .hero h1    { font-size: 28px; }
+  h2          { font-size: 22px; }
+  table       { font-size: 13px; }
+  th, td      { padding: 9px 10px; }
+  .code-block { font-size: 12px; padding: 12px 14px; }
+  .tab-btn    { font-size: 12px; padding: 6px 12px; }
+}
+  </style>
+</head>
+<body>
+
+<nav>
+  <span class="logo">VPN & Tailscale</span>
+  <button class="nav-btn" onclick="scrollToSection('vpn-basics')">VPN Basics</button>
+  <button class="nav-btn" onclick="scrollToSection('how-vpns-work')">How VPNs Work</button>
+  <button class="nav-btn" onclick="scrollToSection('vpn-protocols')">Protocols</button>
+  <button class="nav-btn" onclick="scrollToSection('tailscale-basics')">Tailscale 101</button>
+  <button class="nav-btn" onclick="scrollToSection('tailscale-arch')">Architecture</button>
+  <button class="nav-btn" onclick="scrollToSection('tailscale-features')">Features</button>
+  <button class="nav-btn" onclick="scrollToSection('comparison')">VPN vs Tailscale</button>
+  <button class="nav-btn" onclick="scrollToSection('use-cases')">Use Cases</button>
+</nav>
+
+<div class="container">
+
+  <div class="hero">
+    <h1>VPN & Tailscale</h1>
+    <p>A practical reference for understanding how private networks work — from traditional VPN tunnels to Tailscale's mesh approach. Aimed at intermediate users.</p>
+  </div>
+
+  <!-- ══ SECTION 1: VPN BASICS ══════════════════════════════════ -->
+  <section id="vpn-basics">
+    <div class="section-label">Section 01</div>
+    <h2>VPN Basics</h2>
+    <p>A <strong>Virtual Private Network</strong> creates an encrypted connection between your device and a VPN server, making your traffic appear to originate from that server's location. Think of it as a secure, private road built on top of the public motorway of the internet.</p>
+
+    <h3>The hub-and-spoke model</h3>
+    <p>Traditional VPNs use a <strong>hub-and-spoke architecture</strong>: all devices connect to a central VPN server (the hub), and all traffic flows through it. Every device on the network is a spoke radiating out from that hub. This has a key implication — even if Device A and Device B are physically next to each other, their traffic must travel to the hub and back.</p>
+
+    <div class="tip blue">
+      <div class="tip-label">Remember</div>
+      The VPN server is the centrepiece. It assigns each connected device an internal IP address (e.g. <code>10.0.0.x</code>), making them all appear as if they're on the same local network — even if one is in London and another in Tokyo.
+    </div>
+
+    <h3>Why businesses use VPNs</h3>
+    <div class="card-grid">
+      <div class="card">
+        <div class="num">1</div>
+        <strong>Remote access to internal resources</strong>
+        <span>Employees connecting from home appear to be on the office network. They can reach file servers, printers, and internal tools that aren't exposed to the public internet.</span>
+      </div>
+      <div class="card">
+        <div class="num">2</div>
+        <strong>Unified private IP space</strong>
+        <span>All connected devices get a private IP (e.g. 10.x.x.x). Internal services only listen on these private addresses, so they're invisible to the outside world.</span>
+      </div>
+      <div class="card">
+        <div class="num">3</div>
+        <strong>Firewall circumvention</strong>
+        <span>Because your traffic exits from the VPN server's location, local restrictions (a school Wi-Fi block, or a country-level firewall) don't see your destination — only the encrypted tunnel to the VPN server.</span>
+      </div>
+      <div class="card">
+        <div class="num">4</div>
+        <strong>IP masking &amp; geo-spoofing</strong>
+        <span>Websites see the VPN server's IP, not yours. Choose a server in another country and you appear to be browsing from there — useful for bypassing geo-restrictions on streaming services.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ SECTION 2: HOW VPNs WORK ═══════════════════════════════ -->
+  <section id="how-vpns-work">
+    <div class="section-label">Section 02</div>
+    <h2>How VPNs Work</h2>
+    <p>Under the hood, a VPN does two things to your data: it <strong>encrypts</strong> the content and <strong>encapsulates</strong> it inside a new packet. This two-step process is what creates the "tunnel".</p>
+
+    <h3>Step-by-step: what happens when you visit a website over VPN</h3>
+    <div class="card-grid">
+      <div class="card">
+        <div class="num">1</div>
+        <strong>Handshake &amp; authentication</strong>
+        <span>Your device and the VPN server verify each other's identity and negotiate encryption keys. This is a one-time setup per session — like exchanging secret codebooks before a call.</span>
+      </div>
+      <div class="card">
+        <div class="num">2</div>
+        <strong>Encryption</strong>
+        <span>Your data packet (e.g. a web request to google.com) is encrypted using a shared session key. The content becomes unreadable ciphertext — random noise to anyone who intercepts it.</span>
+      </div>
+      <div class="card">
+        <div class="num">3</div>
+        <strong>Encapsulation</strong>
+        <span>The encrypted packet is wrapped inside a new outer packet addressed to the VPN server. Your original destination (google.com) is hidden inside. Your ISP only sees traffic to the VPN server.</span>
+      </div>
+      <div class="card">
+        <div class="num">4</div>
+        <strong>Transit through the tunnel</strong>
+        <span>The outer packet travels across the public internet to the VPN server. Routers along the way forward it normally — they only see the outer address, not the encrypted contents.</span>
+      </div>
+      <div class="card">
+        <div class="num">5</div>
+        <strong>Decapsulation &amp; decryption</strong>
+        <span>The VPN server strips the outer wrapper, decrypts your original request, and forwards it to google.com on your behalf. To Google, the request appears to come from the VPN server.</span>
+      </div>
+      <div class="card">
+        <div class="num">6</div>
+        <strong>Return journey</strong>
+        <span>Google's response goes to the VPN server, which encrypts it and sends it back through the tunnel to your device, which decrypts it. The whole round-trip is invisible to observers.</span>
+      </div>
+    </div>
+
+    <h3>The packet anatomy</h3>
+    <p>Encapsulation is like putting a sealed letter inside another envelope. The postman (your ISP) only reads the outer envelope; the real message is sealed inside.</p>
+    <div class="code-block">Original packet:
+  [Source: your IP] [Destination: google.com] [Data: HTTP request]
+
+After VPN encapsulation:
+  [Source: your IP] [Destination: VPN server] [Encrypted: [your IP → google.com | HTTP request]]
+                     ↑ Outer envelope ↑        ↑────── Inner sealed letter ──────↑</div>
+
+    <div class="tip gold">
+      <div class="tip-label">How firewalls are bypassed</div>
+      A firewall blocks traffic by inspecting destination addresses or content. When you use a VPN, the firewall only sees encrypted traffic addressed to the VPN server — it can't see that you're ultimately going to a blocked site. The VPN server, sitting outside the firewall's jurisdiction, makes the request on your behalf and returns the answer through the encrypted tunnel.
+    </div>
+
+    <div class="tip red">
+      <div class="tip-label">Watch Out</div>
+      VPNs increase connectivity but don't automatically increase security. Stolen credentials can give an attacker a legitimate IP inside your network. They also introduce a new trust relationship: your VPN provider (or server) can see all your decrypted traffic.
+    </div>
+  </section>
+
+  <!-- ══ SECTION 3: VPN PROTOCOLS ═══════════════════════════════ -->
+  <section id="vpn-protocols">
+    <div class="section-label">Section 03</div>
+    <h2>VPN Protocols</h2>
+    <p>A VPN protocol defines the rules for how encryption, authentication, and tunnelling are performed. The choice of protocol affects speed, security, and compatibility.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:18%">Protocol</th>
+            <th style="width:22%">How it works</th>
+            <th style="width:20%">Speed</th>
+            <th style="width:20%">Security</th>
+            <th style="width:20%">Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>IPSec / IKEv2</strong></td>
+            <td>Operates at the network layer; encrypts entire IP packets</td>
+            <td>Fast; reconnects quickly after network change</td>
+            <td>Strong; widely audited</td>
+            <td>Default on many enterprise VPNs and mobile OSes</td>
+          </tr>
+          <tr>
+            <td><strong>OpenVPN</strong></td>
+            <td>Uses TLS/SSL; runs over TCP or UDP</td>
+            <td>Moderate; more overhead than newer protocols</td>
+            <td>Very strong; open source</td>
+            <td>Hugely popular; ~600k lines of code — large attack surface</td>
+          </tr>
+          <tr>
+            <td><strong>WireGuard</strong></td>
+            <td>Modern cryptography; UDP only; stateless design</td>
+            <td>Fastest; lowest latency</td>
+            <td>Excellent; minimal code surface</td>
+            <td>~4,000 lines of code. Used by Tailscale. The new standard.</td>
+          </tr>
+          <tr>
+            <td><strong>PPTP</strong></td>
+            <td>Oldest; simple tunnelling with weak encryption</td>
+            <td>Very fast</td>
+            <td>Broken — avoid</td>
+            <td>Never use for anything sensitive. Legacy only.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tip">
+      <div class="tip-label">Pro Tip</div>
+      WireGuard is the modern consensus choice: it's simpler, faster, and easier to audit than its predecessors. Both Tailscale and many commercial VPNs now use it under the hood. If you're setting up a self-hosted VPN (e.g. on a VPS), WireGuard is the right starting point.
+    </div>
+  </section>
+
+  <!-- ══ SECTION 4: TAILSCALE 101 ═══════════════════════════════ -->
+  <section id="tailscale-basics">
+    <div class="section-label">Section 04</div>
+    <h2>Tailscale 101</h2>
+    <p>Tailscale is a <strong>mesh VPN</strong> built on top of WireGuard. Instead of the hub-and-spoke model — where every packet passes through a central server — Tailscale connects devices directly to each other. Your collection of devices forms a <strong>tailnet</strong> (your private mesh network).</p>
+
+    <div class="tip blue">
+      <div class="tip-label">Remember</div>
+      Think of Tailscale as WireGuard with all the hard parts automated. Raw WireGuard requires you to manually generate keys for every device and edit config files on every peer every time you add a new one. Tailscale handles all of that automatically.
+    </div>
+
+    <h3>The three-layer architecture</h3>
+    <div class="card-grid">
+      <div class="card">
+        <div class="num">①</div>
+        <strong>WireGuard (data plane)</strong>
+        <span>The actual encryption layer. All traffic between your devices is encrypted end-to-end using WireGuard. Your private keys never leave your device — Tailscale's servers never see them.</span>
+      </div>
+      <div class="card">
+        <div class="num">②</div>
+        <strong>Coordination server (control plane)</strong>
+        <span>Tailscale's cloud server acts as a matchmaker. It distributes each device's public key and network endpoints to the rest of your tailnet. It sees only metadata — never your actual traffic.</span>
+      </div>
+      <div class="card">
+        <div class="num">③</div>
+        <strong>DERP servers (relay fallback)</strong>
+        <span>When two devices can't connect directly (due to NAT or firewalls), encrypted packets are relayed through Tailscale's globally distributed DERP servers. The relay can't decrypt them.</span>
+      </div>
+    </div>
+
+    <h3>How your tailnet gets assembled</h3>
+    <p>When you install Tailscale and sign in, the coordination server:</p>
+    <ul class="styled">
+      <li>Assigns your device a stable private IP address in the <code>100.64.x.x</code> range (these are shared with no one else)</li>
+      <li>Distributes your device's WireGuard public key to every other device on your tailnet</li>
+      <li>Shares the network endpoints (IP + port) of your other devices so direct connections can be attempted</li>
+    </ul>
+    <p>Your devices then try to connect directly to each other using WireGuard. The coordination server's job is done — it's out of the data path entirely.</p>
+
+    <div class="tip gold">
+      <div class="tip-label">Self-hosting option</div>
+      If you're uncomfortable with even the metadata going to Tailscale's servers, <strong>Headscale</strong> is a community-built, open-source replacement for the coordination server that you can self-host. The data plane (WireGuard) remains the same.
+    </div>
+  </section>
+
+  <!-- ══ SECTION 5: TAILSCALE ARCHITECTURE ══════════════════════ -->
+  <section id="tailscale-arch">
+    <div class="section-label">Section 05</div>
+    <h2>Tailscale Architecture</h2>
+    <p>The interesting engineering challenge Tailscale solves is getting two devices to talk directly when both are hidden behind home routers (NAT). Understanding this explains why Tailscale is impressive.</p>
+
+    <h3>The NAT problem</h3>
+    <p>Most home routers use <strong>Network Address Translation (NAT)</strong>: your router has one public IP, and all your devices share it. The router tracks which device made which outgoing request so it can route responses back — but it blocks unsolicited incoming connections. This is great for security, but it makes peer-to-peer connections between two NATted devices difficult: neither can easily "call" the other directly.</p>
+
+    <h3>How Tailscale solves it: hole-punching</h3>
+    <p>Tailscale uses a technique called <strong>UDP hole-punching</strong> (via the STUN protocol). When Device A wants to connect to Device B:</p>
+    <ul class="styled">
+      <li>Both devices contact the coordination server, which tells each one the other's public-facing IP and port</li>
+      <li>Both devices simultaneously send UDP packets to each other — at the same instant</li>
+      <li>Each router sees outgoing traffic to the other device, so it creates a temporary "hole" in its NAT table allowing return traffic in</li>
+      <li>A direct WireGuard-encrypted tunnel is established between the two devices</li>
+    </ul>
+
+    <div class="tip blue">
+      <div class="tip-label">Remember</div>
+      The simultaneous sending is the trick. Each router thinks its device initiated the connection, so it allows the reply in. It's like two people pushing open opposite sides of a revolving door at exactly the same time.
+    </div>
+
+    <h3>When hole-punching fails: DERP servers</h3>
+    <p>Some networks (strict corporate firewalls, carrier-grade NAT) block UDP entirely or prevent hole-punching from working. For these situations, Tailscale falls back to <strong>DERP</strong> (Designated Encrypted Relay for Packets) servers.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:30%">Connection type</th>
+            <th style="width:40%">How it works</th>
+            <th style="width:30%">Performance</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Direct (preferred)</strong></td>
+            <td>WireGuard tunnel straight between the two devices, after successful hole-punch</td>
+            <td>Best latency and throughput</td>
+          </tr>
+          <tr>
+            <td><strong>Peer relay</strong></td>
+            <td>Another device on your tailnet acts as an intermediary relay</td>
+            <td>Good; dedicated capacity</td>
+          </tr>
+          <tr>
+            <td><strong>DERP relay (fallback)</strong></td>
+            <td>Encrypted WireGuard packets forwarded via Tailscale's global relay servers over HTTPS on port 443</td>
+            <td>Slightly higher latency; always available</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tip">
+      <div class="tip-label">Pro Tip</div>
+      All three connection types use the same end-to-end WireGuard encryption. The difference is purely path and performance — not security. Even on a DERP relay, the relay server forwards ciphertext it cannot read.
+    </div>
+
+    <p>DERP operates over HTTPS (port 443), making it almost impossible to block without also blocking all web traffic. Tailscale uses this as a last resort to guarantee connectivity even on the most restrictive networks.</p>
+
+    <div class="tip gold">
+      <div class="tip-label">Caveat</div>
+      The vast majority of Tailscale traffic flows directly peer-to-peer. DERP is a fallback, not the norm. You can run <code>tailscale netcheck</code> to see latency to DERP regions and whether direct connections are working on your current network.
+    </div>
+  </section>
+
+  <!-- ══ SECTION 6: TAILSCALE FEATURES ══════════════════════════ -->
+  <section id="tailscale-features">
+    <div class="section-label">Section 06</div>
+    <h2>Tailscale Features</h2>
+    <p>Beyond the core mesh VPN, Tailscale ships several features that make managing a private network much easier.</p>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="showTab(event, 'tab-magicdns')">MagicDNS</button>
+      <button class="tab-btn" onclick="showTab(event, 'tab-subnet')">Subnet Routers</button>
+      <button class="tab-btn" onclick="showTab(event, 'tab-exit')">Exit Nodes</button>
+      <button class="tab-btn" onclick="showTab(event, 'tab-acl')">ACLs</button>
+      <button class="tab-btn" onclick="showTab(event, 'tab-funnel')">Funnel</button>
+      <button class="tab-btn" onclick="showTab(event, 'tab-ssh')">Tailscale SSH</button>
+    </div>
+
+    <div id="tab-magicdns" class="tab-panel active">
+      <h3>MagicDNS</h3>
+      <p>By default, every tailnet device gets a stable <code>100.64.x.x</code> IP. MagicDNS lets you use <strong>device names</strong> instead of IPs. If your Raspberry Pi is called <code>raspberrypi</code>, you can SSH into it with <code>ssh pi@raspberrypi</code> from anywhere on your tailnet — no IP address needed, no custom DNS server required.</p>
+      <div class="tip">
+        <div class="tip-label">Pro Tip</div>
+        Enable MagicDNS in the Tailscale admin console. Full machine names are available as <code>machinename.your-tailnet-name.ts.net</code>, and you can also set up a global nameserver in the admin panel to resolve your internal DNS (e.g. an AdGuard Home instance) across all tailnet devices.
+      </div>
+    </div>
+
+    <div id="tab-subnet" class="tab-panel">
+      <h3>Subnet Routers</h3>
+      <p>Not every device can run Tailscale — printers, legacy servers, IoT sensors, NAS boxes on old firmware, etc. A <strong>subnet router</strong> is a Tailscale-enabled device that advertises an entire IP subnet into your tailnet. Any tailnet device can then reach anything on that subnet, as if they were on the same local network.</p>
+      <p>For example: your home server runs Tailscale and advertises <code>192.168.1.0/24</code>. Now your laptop (anywhere in the world) can reach your home printer at <code>192.168.1.50</code> without installing anything on the printer.</p>
+      <div class="code-block"># On the subnet router (Linux):
+sudo tailscale set --advertise-routes=192.168.1.0/24
+
+# Then approve the route in the Tailscale admin console</div>
+      <div class="tip gold">
+        <div class="tip-label">Caveat</div>
+        If your subnet router goes offline, you lose access to everything on that subnet. For production use, consider advertising the same route from two different devices for redundancy.
+      </div>
+    </div>
+
+    <div id="tab-exit" class="tab-panel">
+      <h3>Exit Nodes</h3>
+      <p>By default, Tailscale only routes traffic destined for your tailnet through the encrypted mesh. Your regular web browsing still goes out your local connection. An <strong>exit node</strong> changes this: it routes <em>all</em> internet traffic through a designated tailnet device, making Tailscale behave like a traditional full-tunnel VPN.</p>
+      <p>If you designate your home server as an exit node and enable it on your laptop at a café, all your internet traffic appears to come from your home IP — not the café's network. You're trusting your home connection instead of the café's Wi-Fi.</p>
+      <div class="code-block"># On the device you want as exit node:
+sudo tailscale set --advertise-exit-node
+
+# On the client device (using it):
+sudo tailscale set --exit-node=<exit-node-ip></div>
+      <div class="tip blue">
+        <div class="tip-label">Remember</div>
+        Exit node = "send all internet traffic through me" (<code>0.0.0.0/0</code>). Subnet router = "send only traffic for these private subnets through me." One machine can do both.
+      </div>
+    </div>
+
+    <div id="tab-acl" class="tab-panel">
+      <h3>Access Control Lists (ACLs)</h3>
+      <p>By default, all devices on your tailnet can reach each other. ACLs let you restrict this — useful if you share a tailnet across a team or have devices you want to keep isolated. ACLs are defined in JSON and managed from the admin console.</p>
+      <div class="code-block">// Example: only users tagged 'developer' can reach the server
+{
+  "acls": [
+    {
+      "action": "accept",
+      "src": ["tag:developer"],
+      "dst": ["tag:server:22"]
+    }
+  ]
+}</div>
+      <div class="tip">
+        <div class="tip-label">Pro Tip</div>
+        ACLs integrate with your identity provider (Google, GitHub, Okta, etc.). You can write rules like "people in the 'engineering' group can reach servers tagged 'prod'", and Tailscale enforces this automatically as people join or leave teams.
+      </div>
+    </div>
+
+    <div id="tab-funnel" class="tab-panel">
+      <h3>Tailscale Funnel</h3>
+      <p>The reverse of a normal VPN connection: Funnel lets you expose a service running on your tailnet device to the <strong>public internet</strong>, without opening firewall ports or configuring your router. Tailscale gives you a public <code>*.ts.net</code> HTTPS URL that proxies to your local service.</p>
+      <p>This is perfect for sharing a local dev server for a demo, receiving webhooks during development, or running a lightweight self-hosted app without touching your router's port-forward settings.</p>
+      <div class="code-block"># Expose port 3000 on your machine to the public internet:
+tailscale funnel 3000
+
+# Accessible at: https://your-machine.your-tailnet.ts.net</div>
+      <div class="tip gold">
+        <div class="tip-label">When to Use</div>
+        Funnel is great for temporary exposure and dev/demo work. For permanent public services, a proper reverse proxy (Caddy, nginx) with a real domain is more appropriate. Funnel traffic passes through Tailscale's infrastructure.
+      </div>
+    </div>
+
+    <div id="tab-ssh" class="tab-panel">
+      <h3>Tailscale SSH</h3>
+      <p>Normally, SSH requires you to manage public keys on each server. Tailscale SSH replaces this with identity-based access controlled by your ACLs and identity provider. You don't need to distribute SSH keys, and port 22 doesn't need to be exposed — the connection goes through your encrypted tailnet.</p>
+      <div class="code-block"># Enable Tailscale SSH on a server:
+sudo tailscale set --ssh
+
+# SSH from any tailnet device — no key management needed:
+ssh user@machinename</div>
+      <div class="tip">
+        <div class="tip-label">Pro Tip</div>
+        Tailscale SSH also supports optional session recording for audit and compliance, and check mode (requiring re-authentication for sensitive operations). It's strictly more convenient than traditional SSH key distribution for small teams and homelab setups.
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ SECTION 7: COMPARISON ═══════════════════════════════════ -->
+  <section id="comparison">
+    <div class="section-label">Section 07</div>
+    <h2>VPN vs Tailscale</h2>
+    <p>These tools solve overlapping but different problems. The right framing: traditional VPNs are about <em>accessing a network through a central gateway</em>; Tailscale is about <em>making your own devices feel like they're on the same local network</em>.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:25%">Dimension</th>
+            <th style="width:37%">Traditional VPN</th>
+            <th style="width:38%">Tailscale</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Architecture</strong></td>
+            <td>Hub-and-spoke: all traffic flows through a central server</td>
+            <td>Mesh: devices connect directly to each other (P2P)</td>
+          </tr>
+          <tr>
+            <td><strong>Traffic routing</strong></td>
+            <td>All internet traffic typically goes through the VPN server (full tunnel)</td>
+            <td>By default, only tailnet traffic is routed through Tailscale; regular browsing is unaffected</td>
+          </tr>
+          <tr>
+            <td><strong>Setup complexity</strong></td>
+            <td>Server needed; firewall rules; client configuration; certificate management</td>
+            <td>Install app, sign in. Zero config. No open ports or firewall rules needed.</td>
+          </tr>
+          <tr>
+            <td><strong>Performance</strong></td>
+            <td>All traffic through hub adds latency; hub is a bottleneck</td>
+            <td>Direct P2P connection; lower latency; no bottleneck for device-to-device traffic</td>
+          </tr>
+          <tr>
+            <td><strong>IP anonymity</strong></td>
+            <td>Yes — your public IP is replaced by the VPN server's IP</td>
+            <td>No by default. You need to configure an exit node to mask your IP.</td>
+          </tr>
+          <tr>
+            <td><strong>Geo-unblocking</strong></td>
+            <td>Yes — commercial VPNs offer servers in dozens of countries</td>
+            <td>Only if you own a device in the target country to use as an exit node</td>
+          </tr>
+          <tr>
+            <td><strong>Accessing non-Tailscale devices</strong></td>
+            <td>Any device on the VPN server's local network is reachable</td>
+            <td>Requires a subnet router on a Tailscale device to expose those devices</td>
+          </tr>
+          <tr>
+            <td><strong>Key management</strong></td>
+            <td>Manual or via PKI; certificates; potential for misconfiguration</td>
+            <td>Automatic — Tailscale's coordination server handles key distribution</td>
+          </tr>
+          <tr>
+            <td><strong>Cost</strong></td>
+            <td>Commercial VPN ~£5–15/month; self-hosting requires a VPS</td>
+            <td>Free for personal use (up to 3 users, 100 devices); paid plans for teams</td>
+          </tr>
+          <tr>
+            <td><strong>Trust model</strong></td>
+            <td>You trust the VPN provider with all your internet traffic</td>
+            <td>You trust Tailscale with metadata only; actual traffic is end-to-end encrypted</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tip red">
+      <div class="tip-label">Common Misconception</div>
+      Tailscale is <strong>not a privacy VPN</strong> by default. Your general web browsing is not anonymised — it still exits from your regular internet connection. Tailscale is fundamentally a connectivity tool (make your devices a private network) rather than an anonymity tool. Only exit-node mode makes it behave like a traditional full-tunnel VPN.
+    </div>
+  </section>
+
+  <!-- ══ SECTION 8: USE CASES ════════════════════════════════════ -->
+  <section id="use-cases">
+    <div class="section-label">Section 08</div>
+    <h2>Use Cases</h2>
+    <p>Choosing between a traditional VPN and Tailscale usually comes down to what you're actually trying to do.</p>
+
+    <h3>Reach for a traditional VPN when you need to…</h3>
+    <ul class="styled">
+      <li><strong>Browse anonymously or bypass geo-restrictions</strong> — commercial VPNs have servers in dozens of countries, ready to use</li>
+      <li><strong>Protect traffic on untrusted public Wi-Fi</strong> — a full-tunnel VPN encrypts everything leaving your device, regardless of destination</li>
+      <li><strong>Comply with corporate IT policy</strong> — enterprise VPN clients (Cisco AnyConnect, GlobalProtect) are often required by employers</li>
+      <li><strong>Give a large number of users access to a single corporate network</strong> — the hub model is well-understood and scales predictably</li>
+    </ul>
+
+    <h3>Reach for Tailscale when you need to…</h3>
+    <ul class="styled">
+      <li><strong>Access your homelab from anywhere</strong> — SSH into your Raspberry Pi, NAS, or home server without port-forwarding or a public IP</li>
+      <li><strong>Connect your own devices securely</strong> — laptop, phone, desktop, and servers all on one private network, accessible from anywhere</li>
+      <li><strong>Share access to a local network with a small team</strong> — subnet router exposes your LAN; ACLs control who can reach what</li>
+      <li><strong>Avoid port-forwarding entirely</strong> — Tailscale's NAT traversal means your router firewall stays closed; no exposed ports</li>
+      <li><strong>Replace a self-hosted WireGuard setup</strong> — Tailscale automates all the key management and config that raw WireGuard requires manually</li>
+      <li><strong>Run quick demos or receive webhooks locally</strong> — Tailscale Funnel gives you a public HTTPS URL with no router configuration</li>
+      <li><strong>Use your home IP as a trusted exit point</strong> — configure your home server as an exit node; browse from café Wi-Fi as if you were home</li>
+    </ul>
+
+    <div class="tip">
+      <div class="tip-label">Pro Tip</div>
+      These tools are not mutually exclusive. Many people use Tailscale for device-to-device access and homelab management, and a commercial VPN (like Mullvad or ProtonVPN) separately for anonymity and geo-unblocking. Tailscale even has an official integration with Mullvad, letting you use Mullvad's servers as exit nodes from within your tailnet.
+    </div>
+
+    <div class="tip blue">
+      <div class="tip-label">Remember — The mental model</div>
+      Traditional VPN: "I want my traffic to appear to come from somewhere else." Tailscale: "I want my devices to act like they're all on the same local network, wherever they physically are."
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  VPN & Tailscale Cheat Sheet · Built with Claude · May 2026<br>
+  <a href="https://tailscale.com/blog/how-tailscale-works" target="_blank">Tailscale: How it works</a> ·
+  <a href="https://tailscale.com/docs" target="_blank">Tailscale Docs</a> ·
+  <a href="https://www.wireguard.com/papers/wireguard.pdf" target="_blank">WireGuard White Paper</a>
+</footer>
+
+<script>
+  function showTab(event, id) {
+    const tabs = event.target.closest('.tabs');
+    const section = tabs.parentElement;
+    tabs.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    section.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    event.target.classList.add('active');
+    document.getElementById(id).classList.add('active');
+  }
+
+  function scrollToSection(id) {
+    document.getElementById(id).scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  const sections = document.querySelectorAll('section[id]');
+  const navBtns = document.querySelectorAll('nav .nav-btn');
+  const navObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navBtns.forEach(b => b.classList.remove('active'));
+        navBtns.forEach(b => {
+          if (b.getAttribute('onclick').includes("'" + entry.target.id + "'"))
+            b.classList.add('active');
+        });
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+  sections.forEach(s => navObserver.observe(s));
+
+  if (!window.matchMedia('(hover: hover)').matches) {
+    const cards = document.querySelectorAll('.card');
+    const cardObserver = new IntersectionObserver(entries => {
+      entries.forEach(e => { e.target.dataset.ratio = e.isIntersecting ? e.intersectionRatio : 0; });
+      let best = null, bestR = 0;
+      cards.forEach(c => { const r = parseFloat(c.dataset.ratio)||0; if (r > bestR) { bestR = r; best = c; } });
+      cards.forEach(c => c.classList.toggle('in-view', c === best && bestR > 0));
+    }, { threshold: [0, 0.25, 0.5, 0.75, 1] });
+    cards.forEach(c => cardObserver.observe(c));
+  }
+</script>
+</body>
+</html>

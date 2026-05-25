@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CLI Cheat Sheet</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💻</text></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+/* ── TOKENS ────────────────────────────────────────────────── */
+:root {
+  --bg:       #f5f6fa;
+  --surface:  #ffffff;
+  --surface2: #eef0f6;
+  --border:   #d5d8e3;
+  --text:       #2e3248;
+  --text-bright:#1a1c2b;
+  --text-dim:   #555970;
+  --accent:      #d63555;
+  --accent-glow: rgba(214,53,85,0.08);
+  --teal:        #0e8a72;
+  --teal-glow:   rgba(14,138,114,0.07);
+  --blue:        #3a6ae8;
+  --blue-glow:   rgba(58,106,232,0.07);
+  --gold:        #c48800;
+  --gold-glow:   rgba(196,136,0,0.07);
+  --radius:       10px;
+  --font-display: 'DM Serif Display', Georgia, serif;
+  --font-body:    'DM Sans', sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:       #111218;
+    --surface:  #1a1b26;
+    --surface2: #222433;
+    --border:   #33364a;
+    --text:       #c4c7d8;
+    --text-bright:#eceef6;
+    --text-dim:   #8b8faa;
+    --accent:      #f0506a;
+    --accent-glow: rgba(240,80,106,0.14);
+    --teal:        #2ec4a2;
+    --teal-glow:   rgba(46,196,162,0.1);
+    --blue:        #6b9aff;
+    --blue-glow:   rgba(107,154,255,0.1);
+    --gold:        #f5b731;
+    --gold-glow:   rgba(245,183,49,0.1);
+  }
+  nav    { background: rgba(17,18,24,0.88); }
+  thead  { background: var(--surface2); }
+  code   { color: var(--teal); }
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { overflow-x: hidden; width: 100%; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.65;
+  -webkit-text-size-adjust: 100%;
+  padding-top: 52px;
+}
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  height: 52px;
+  background: rgba(245,246,250,0.88);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+nav::-webkit-scrollbar { display: none; }
+.logo {
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--accent);
+  white-space: nowrap;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+.nav-btn {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  background: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: color 0.2s, background 0.2s;
+}
+.nav-btn:hover, .nav-btn.active {
+  color: var(--text-bright);
+  background: var(--surface2);
+}
+.container {
+  max-width: min(820px, 100%);
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+}
+.hero {
+  text-align: center;
+  padding: 48px 0 40px;
+  position: relative;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -60px; left: 50%;
+  transform: translateX(-50%);
+  width: min(500px, 100vw);
+  height: 400px;
+  background: radial-gradient(ellipse, rgba(214,53,85,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 6vw, 48px);
+  color: var(--text-bright);
+  letter-spacing: -0.5px;
+  margin-bottom: 12px;
+  position: relative;
+}
+.hero p {
+  color: var(--text-dim);
+  font-size: 16px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+section {
+  margin-top: 48px;
+  scroll-margin-top: 68px;
+}
+.section-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.8px;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.section-label::before {
+  content: '';
+  width: 18px; height: 2px;
+  background: var(--accent);
+  border-radius: 1px;
+}
+h2 {
+  font-family: var(--font-display);
+  font-size: 28px;
+  color: var(--text-bright);
+  margin-bottom: 16px;
+}
+h3 {
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--text-bright);
+  margin: 24px 0 10px;
+}
+p + p { margin-top: 10px; }
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px;
+  margin-top: 16px;
+}
+.card {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  transition: border-color 0.3s, box-shadow 0.3s, transform 0.2s;
+}
+@media (hover: hover) {
+  .card:hover {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+    transform: translateY(-2px);
+  }
+}
+@media (hover: none) {
+  .card.in-view {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+}
+.card .num {
+  font-family: var(--font-display);
+  font-size: 28px;
+  color: var(--accent);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.card strong { color: var(--text-bright); display: block; margin-bottom: 4px; }
+.card span   { font-size: 13.5px; color: var(--text-dim); }
+.table-wrap {
+  margin-top: 16px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  max-width: 100%;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  table-layout: fixed;
+  word-wrap: break-word;
+}
+thead { background: var(--surface2); }
+th {
+  text-align: left;
+  padding: 12px 16px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-bright);
+  border-bottom: 1px solid var(--border);
+}
+td {
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+tr:last-child td { border-bottom: none; }
+tr:nth-child(even) { background: color-mix(in srgb, var(--surface2) 40%, transparent); }
+code, .code-block {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  background: var(--surface2);
+  border-radius: 5px;
+}
+code {
+  padding: 2px 7px;
+  color: var(--teal);
+}
+.code-block {
+  display: block;
+  padding: 14px 18px;
+  margin: 10px 0;
+  color: var(--text);
+  border: 1px solid var(--border);
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.55;
+}
+.tip {
+  border-left: 3px solid var(--teal);
+  background: var(--teal-glow);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin: 16px 0;
+}
+.tip.blue { border-color: var(--blue); background: var(--blue-glow); }
+.tip.gold { border-color: var(--gold); background: var(--gold-glow); }
+.tip.red  { border-color: var(--accent); background: var(--accent-glow); }
+.tip-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  margin-bottom: 6px;
+}
+.tip      .tip-label { color: var(--teal); }
+.tip.blue .tip-label { color: var(--blue); }
+.tip.gold .tip-label { color: var(--gold); }
+.tip.red  .tip-label { color: var(--accent); }
+ul.styled { list-style: none; margin: 10px 0; }
+ul.styled li {
+  position: relative;
+  padding-left: 20px;
+  margin-bottom: 6px;
+}
+ul.styled li::before {
+  content: '›';
+  position: absolute;
+  left: 4px;
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.5;
+}
+.ba-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 16px;
+}
+.ba-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+.ba-box.after { border-color: var(--teal); }
+.ba-tag {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+  margin-bottom: 10px;
+}
+.ba-box:not(.after) .ba-tag { color: var(--text-dim); }
+.ba-box.after       .ba-tag { color: var(--teal); }
+.ba-box blockquote {
+  font-style: italic;
+  color: var(--text-dim);
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+.ba-box.after blockquote { color: var(--text); }
+footer {
+  text-align: center;
+  padding: 40px 24px;
+  color: var(--text-dim);
+  font-size: 13px;
+  border-top: 1px solid var(--border);
+  margin-top: 56px;
+  word-break: break-word;
+}
+footer a { color: var(--accent); text-decoration: none; }
+@media (max-width: 600px) {
+  .ba-grid, .card-grid { grid-template-columns: 1fr; }
+  .container  { padding: 24px 16px 60px; }
+  nav         { padding: 0 12px; gap: 4px; }
+  .hero       { padding: 32px 0 28px; }
+  .hero h1    { font-size: 28px; }
+  h2          { font-size: 22px; }
+  table       { font-size: 13px; }
+  th, td      { padding: 9px 10px; }
+  .code-block { font-size: 12px; padding: 12px 14px; }
+}
+  </style>
+</head>
+<body>
+
+<nav>
+  <span class="logo">CLI</span>
+  <button class="nav-btn" onclick="scrollToSection('navigation')">Navigation</button>
+  <button class="nav-btn" onclick="scrollToSection('listing')">Listing Files</button>
+  <button class="nav-btn" onclick="scrollToSection('files')">Files &amp; Folders</button>
+  <button class="nav-btn" onclick="scrollToSection('viewing')">Viewing Content</button>
+  <button class="nav-btn" onclick="scrollToSection('system')">System &amp; Misc</button>
+  <button class="nav-btn" onclick="scrollToSection('gotchas')">Watch Out</button>
+</nav>
+
+<div class="container">
+  <div class="hero">
+    <h1>CLI Cheat Sheet</h1>
+    <p>Command Prompt (Windows) vs Linux Terminal — common commands side by side.</p>
+  </div>
+
+  <!-- NAVIGATION -->
+  <section id="navigation">
+    <div class="section-label">Section 01</div>
+    <h2>Navigation</h2>
+    <p>Moving around the file system — the most common thing you'll do in any terminal.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:24%">Action</th>
+            <th style="width:28%">Windows (cmd)</th>
+            <th style="width:28%">Linux (bash)</th>
+            <th style="width:20%">Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Show current directory</td>
+            <td><code>cd</code></td>
+            <td><code>pwd</code></td>
+            <td>cmd with no args prints path; bash has a dedicated command</td>
+          </tr>
+          <tr>
+            <td>Change directory</td>
+            <td><code>cd foldername</code></td>
+            <td><code>cd foldername</code></td>
+            <td>Same!</td>
+          </tr>
+          <tr>
+            <td>Go up one level</td>
+            <td><code>cd ..</code></td>
+            <td><code>cd ..</code></td>
+            <td>Same!</td>
+          </tr>
+          <tr>
+            <td>Go to home directory</td>
+            <td><code>cd %USERPROFILE%</code></td>
+            <td><code>cd ~</code></td>
+            <td>Linux shorthand is much tidier</td>
+          </tr>
+          <tr>
+            <td>Go to root</td>
+            <td><code>cd \</code></td>
+            <td><code>cd /</code></td>
+            <td>Windows uses <code>\</code>; Linux uses <code>/</code></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tip blue">
+      <div class="tip-label">Remember</div>
+      Windows paths use backslashes (<code>\Users\name\Documents</code>); Linux paths use forward slashes (<code>/home/name/documents</code>). This trips people up constantly when switching between systems.
+    </div>
+  </section>
+
+  <!-- LISTING FILES -->
+  <section id="listing">
+    <div class="section-label">Section 02</div>
+    <h2>Listing Files</h2>
+    <p>Seeing what's in the current directory — probably the first command you'll reach for.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:24%">Action</th>
+            <th style="width:28%">Windows (cmd)</th>
+            <th style="width:28%">Linux (bash)</th>
+            <th style="width:20%">Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>List files</td>
+            <td><code>dir</code></td>
+            <td><code>ls</code></td>
+            <td>The core difference to remember</td>
+          </tr>
+          <tr>
+            <td>Detailed list</td>
+            <td><code>dir /q</code></td>
+            <td><code>ls -l</code></td>
+            <td>Shows permissions, size, dates</td>
+          </tr>
+          <tr>
+            <td>Show hidden files</td>
+            <td><code>dir /a</code></td>
+            <td><code>ls -a</code></td>
+            <td>Linux hidden files start with a dot</td>
+          </tr>
+          <tr>
+            <td>Detailed + hidden</td>
+            <td><code>dir /a /q</code></td>
+            <td><code>ls -la</code></td>
+            <td>Flags combine in Linux: <code>-la</code> = long + all</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tip">
+      <div class="tip-label">Pro Tip</div>
+      In Linux, <code>ls -la</code> is one of the most useful commands you'll use — it shows everything including hidden config files, file sizes, and who owns each file.
+    </div>
+  </section>
+
+  <!-- FILES & FOLDERS -->
+  <section id="files">
+    <div class="section-label">Section 03</div>
+    <h2>Files &amp; Folders</h2>
+    <p>Creating, copying, moving, and deleting — handle with care.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:24%">Action</th>
+            <th style="width:28%">Windows (cmd)</th>
+            <th style="width:28%">Linux (bash)</th>
+            <th style="width:20%">Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Create folder</td>
+            <td><code>mkdir foldername</code></td>
+            <td><code>mkdir foldername</code></td>
+            <td>Same!</td>
+          </tr>
+          <tr>
+            <td>Delete file</td>
+            <td><code>del filename</code></td>
+            <td><code>rm filename</code></td>
+            <td><strong>rm is permanent</strong> — no recycle bin</td>
+          </tr>
+          <tr>
+            <td>Delete folder</td>
+            <td><code>rmdir /s foldername</code></td>
+            <td><code>rm -r foldername</code></td>
+            <td><code>-r</code> = recursive (includes all contents)</td>
+          </tr>
+          <tr>
+            <td>Copy file</td>
+            <td><code>copy src dest</code></td>
+            <td><code>cp src dest</code></td>
+            <td>Use <code>cp -r</code> for folders in Linux</td>
+          </tr>
+          <tr>
+            <td>Move / rename</td>
+            <td><code>move src dest</code></td>
+            <td><code>mv src dest</code></td>
+            <td><code>mv</code> doubles as rename in Linux</td>
+          </tr>
+          <tr>
+            <td>Create empty file</td>
+            <td><code>type nul &gt; file.txt</code></td>
+            <td><code>touch file.txt</code></td>
+            <td>Linux <code>touch</code> is much cleaner</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tip red">
+      <div class="tip-label">Watch Out</div>
+      <code>rm -r foldername</code> in Linux deletes everything instantly with no confirmation and no undo. There is no recycle bin. Double-check before you press Enter — especially with wildcards like <code>rm -r *</code>.
+    </div>
+
+    <h3>Renaming a file — before &amp; after</h3>
+    <div class="ba-grid">
+      <div class="ba-box">
+        <div class="ba-tag">Windows</div>
+        <blockquote><code>move oldname.txt newname.txt</code><br><br>The <code>move</code> command handles both moving and renaming.</blockquote>
+      </div>
+      <div class="ba-box after">
+        <div class="ba-tag">Linux</div>
+        <blockquote><code>mv oldname.txt newname.txt</code><br><br>Same idea — <code>mv</code> moves or renames depending on whether the destination is a folder or filename.</blockquote>
+      </div>
+    </div>
+  </section>
+
+  <!-- VIEWING CONTENT -->
+  <section id="viewing">
+    <div class="section-label">Section 04</div>
+    <h2>Viewing Content</h2>
+    <p>Reading files and searching inside them without opening an editor.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:24%">Action</th>
+            <th style="width:28%">Windows (cmd)</th>
+            <th style="width:28%">Linux (bash)</th>
+            <th style="width:20%">Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Print file contents</td>
+            <td><code>type filename</code></td>
+            <td><code>cat filename</code></td>
+            <td><code>cat</code> can also concatenate multiple files</td>
+          </tr>
+          <tr>
+            <td>Page through a file</td>
+            <td><code>more filename</code></td>
+            <td><code>less filename</code></td>
+            <td><code>less</code> lets you scroll up and down; <code>q</code> to quit</td>
+          </tr>
+          <tr>
+            <td>Search inside a file</td>
+            <td><code>findstr "text" file</code></td>
+            <td><code>grep "text" file</code></td>
+            <td><code>grep</code> is far more powerful and supports regex</td>
+          </tr>
+          <tr>
+            <td>Search recursively</td>
+            <td><code>findstr /s "text" *</code></td>
+            <td><code>grep -r "text" .</code></td>
+            <td>Searches all files in all subfolders</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tip">
+      <div class="tip-label">Pro Tip</div>
+      <code>grep</code> is one of Linux's most powerful tools. Combine it with a pipe to search command output: <code>ls -la | grep ".txt"</code> filters the listing to only show <code>.txt</code> files.
+    </div>
+  </section>
+
+  <!-- SYSTEM & MISC -->
+  <section id="system">
+    <div class="section-label">Section 05</div>
+    <h2>System &amp; Misc</h2>
+    <p>Everyday utility commands for managing processes, network, and your environment.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:24%">Action</th>
+            <th style="width:28%">Windows (cmd)</th>
+            <th style="width:28%">Linux (bash)</th>
+            <th style="width:20%">Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Clear screen</td>
+            <td><code>cls</code></td>
+            <td><code>clear</code></td>
+            <td><code>Ctrl+L</code> also works in Linux</td>
+          </tr>
+          <tr>
+            <td>Print text</td>
+            <td><code>echo Hello</code></td>
+            <td><code>echo Hello</code></td>
+            <td>Same!</td>
+          </tr>
+          <tr>
+            <td>Command history</td>
+            <td><code>doskey /history</code></td>
+            <td><code>history</code></td>
+            <td>Up arrow scrolls through history in both</td>
+          </tr>
+          <tr>
+            <td>Find a program's path</td>
+            <td><code>where python</code></td>
+            <td><code>which python</code></td>
+            <td>Useful for checking which version is active</td>
+          </tr>
+          <tr>
+            <td>Show environment variable</td>
+            <td><code>echo %PATH%</code></td>
+            <td><code>echo $PATH</code></td>
+            <td><code>%VAR%</code> in cmd; <code>$VAR</code> in bash</td>
+          </tr>
+          <tr>
+            <td>List running processes</td>
+            <td><code>tasklist</code></td>
+            <td><code>ps aux</code></td>
+            <td>Or use <code>top</code> / <code>htop</code> interactively</td>
+          </tr>
+          <tr>
+            <td>Kill a process</td>
+            <td><code>taskkill /PID 1234</code></td>
+            <td><code>kill 1234</code></td>
+            <td>Use <code>kill -9 1234</code> to force-quit in Linux</td>
+          </tr>
+          <tr>
+            <td>Network info</td>
+            <td><code>ipconfig</code></td>
+            <td><code>ip a</code></td>
+            <td><code>ifconfig</code> is older; <code>ip a</code> is modern Linux</td>
+          </tr>
+          <tr>
+            <td>Ping a host</td>
+            <td><code>ping google.com</code></td>
+            <td><code>ping google.com</code></td>
+            <td>Same! Linux pings forever — use <code>Ctrl+C</code> to stop</td>
+          </tr>
+          <tr>
+            <td>Get help</td>
+            <td><code>help command</code></td>
+            <td><code>man command</code></td>
+            <td><code>man</code> = manual; very detailed. Press <code>q</code> to quit</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- WATCH OUT -->
+  <section id="gotchas">
+    <div class="section-label">Section 06</div>
+    <h2>Common Gotchas</h2>
+    <p>The things most likely to trip you up when switching between the two systems.</p>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="num">1</div>
+        <strong>Slash direction</strong>
+        <span>Windows uses <code>\</code> in paths; Linux uses <code>/</code>. Scripts written for one will break on the other.</span>
+      </div>
+      <div class="card">
+        <div class="num">2</div>
+        <strong>Variable syntax</strong>
+        <span>Windows wraps variables in percent signs: <code>%VAR%</code>. Bash uses a dollar sign: <code>$VAR</code>. Easy to mix up.</span>
+      </div>
+      <div class="card">
+        <div class="num">3</div>
+        <strong>rm has no undo</strong>
+        <span>Unlike Windows <code>del</code>, Linux <code>rm</code> bypasses the trash entirely. It's gone immediately and permanently.</span>
+      </div>
+      <div class="card">
+        <div class="num">4</div>
+        <strong>Case sensitivity</strong>
+        <span>Linux filenames are case-sensitive: <code>File.txt</code> and <code>file.txt</code> are different files. Windows is not.</span>
+      </div>
+      <div class="card">
+        <div class="num">5</div>
+        <strong>Ping runs forever</strong>
+        <span>Linux <code>ping</code> doesn't stop on its own. Use <code>Ctrl+C</code> to cancel it, or <code>ping -c 4</code> to limit to 4 packets.</span>
+      </div>
+      <div class="card">
+        <div class="num">6</div>
+        <strong>dir vs ls</strong>
+        <span>The single most common muscle-memory mistake when switching. <code>dir</code> on Linux will just say "command not found".</span>
+      </div>
+    </div>
+
+    <div class="tip gold">
+      <div class="tip-label">When to Use</div>
+      If you're working on Windows but need bash scripting, consider <strong>WSL</strong> (Windows Subsystem for Linux) — it gives you a full Linux terminal inside Windows, so you don't have to context-switch.
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  CLI Cheat Sheet · Built with Claude · May 2026
+</footer>
+
+<script>
+  function scrollToSection(id) {
+    document.getElementById(id).scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  const sections = document.querySelectorAll('section[id]');
+  const navBtns = document.querySelectorAll('nav .nav-btn');
+  const navObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navBtns.forEach(b => b.classList.remove('active'));
+        navBtns.forEach(b => {
+          if (b.getAttribute('onclick').includes("'" + entry.target.id + "'"))
+            b.classList.add('active');
+        });
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+  sections.forEach(s => navObserver.observe(s));
+
+  if (!window.matchMedia('(hover: hover)').matches) {
+    const cards = document.querySelectorAll('.card');
+    const cardObserver = new IntersectionObserver(entries => {
+      entries.forEach(e => { e.target.dataset.ratio = e.isIntersecting ? e.intersectionRatio : 0; });
+      let best = null, bestR = 0;
+      cards.forEach(c => { const r = parseFloat(c.dataset.ratio)||0; if (r > bestR) { bestR = r; best = c; } });
+      cards.forEach(c => c.classList.toggle('in-view', c === best && bestR > 0));
+    }, { threshold: [0, 0.25, 0.5, 0.75, 1] });
+    cards.forEach(c => cardObserver.observe(c));
+  }
+</script>
+</body>
+</html>
