@@ -16,7 +16,7 @@ Each cheatsheet is a self-contained HTML file with a fixed nav, smooth scroll, r
 
 ## Design System
 
-All cheatsheets use a consistent editorial-minimal design system defined in the `cheatsheet-builder` Claude skill:
+All cheatsheets share a single stylesheet at `cheatsheets/cheatsheet.css`. Edit that file to change styles globally.
 
 - **Fonts:** DM Serif Display (headings), DM Sans (body), JetBrains Mono (code)
 - **Colour semantics:** Red = accent/brand, Teal = tips/best practice, Blue = info, Gold = caveats/timing
