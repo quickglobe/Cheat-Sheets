@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Markdown Cheat Sheet</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23d63555'/%3E%3Cpath d='M8 8l10 8-10 8' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3Cline x1='20' y1='24' x2='26' y2='24' stroke='white' stroke-width='3.5' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="cheatsheet.css">
+</head>
+<body>
+
+<nav>
+  <a href="../index.html" class="logo" style="text-decoration:none;">MD</a>
+  <button class="nav-btn" onclick="scrollToSection('headings')">Headings</button>
+  <button class="nav-btn" onclick="scrollToSection('paragraphs')">Paragraphs</button>
+  <button class="nav-btn" onclick="scrollToSection('emphasis')">Emphasis</button>
+  <button class="nav-btn" onclick="scrollToSection('blockquotes')">Blockquotes</button>
+  <button class="nav-btn" onclick="scrollToSection('lists')">Lists</button>
+  <button class="nav-btn" onclick="scrollToSection('code')">Code</button>
+  <button class="nav-btn" onclick="scrollToSection('links')">Links &amp; Images</button>
+  <button class="nav-btn" onclick="scrollToSection('tables')">Tables</button>
+  <button class="nav-btn" onclick="scrollToSection('hr')">Horiz. Rules</button>
+  <button class="nav-btn" onclick="scrollToSection('escaping')">Escaping</button>
+  <button class="nav-btn" onclick="scrollToSection('mistakes')">Mistakes</button>
+</nav>
+
+<div class="container">
+  <div class="hero">
+    <h1>Markdown Cheat Sheet</h1>
+    <p>Syntax reference for CommonMark and GitHub Flavored Markdown — from structure and emphasis to tables, escaping, and common gotchas.</p>
+  </div>
+
+  <!-- HEADINGS -->
+  <section id="headings">
+    <div class="section-label">Section 01</div>
+    <h2>Headings</h2>
+    <p>Headings organise content into a hierarchy. Markdown supports two styles — ATX (hash prefix) is almost always preferred.</p>
+
+    <h3>ATX style</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:32%">Markdown</th>
+            <th style="width:22%">HTML output</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code># Heading 1</code></td><td><code>&lt;h1&gt;</code></td><td>Top-level — use once per page</td></tr>
+          <tr><td><code>## Heading 2</code></td><td><code>&lt;h2&gt;</code></td><td>Primary section</td></tr>
+          <tr><td><code>### Heading 3</code></td><td><code>&lt;h3&gt;</code></td><td>Sub-section</td></tr>
+          <tr><td><code>#### Heading 4</code></td><td><code>&lt;h4&gt;</code></td><td>Rarely needed</td></tr>
+          <tr><td><code>##### Heading 5</code></td><td><code>&lt;h5&gt;</code></td><td>Very rarely needed</td></tr>
+          <tr><td><code>###### Heading 6</code></td><td><code>&lt;h6&gt;</code></td><td>Almost never needed</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Setext style (H1 / H2 only)</h3>
+    <pre class="code-block">Heading 1
+=========
+
+Heading 2
+---------</pre>
+
+    <div class="tip">
+      <div class="tip-label">Pro Tip</div>
+      Always use ATX style. Setext is harder to read in source, only supports two levels, and the <code>---</code> underline is easily confused with a horizontal rule.
+    </div>
+
+    <div class="tip red">
+      <div class="tip-label">Watch Out</div>
+      Never skip heading levels for visual effect — jumping from <code>## H2</code> straight to <code>#### H4</code> breaks accessibility and document structure. Use CSS if you want different sizes.
+    </div>
+  </section>
+
+  <!-- PARAGRAPHS & LINE BREAKS -->
+  <section id="paragraphs">
+    <div class="section-label">Section 02</div>
+    <h2>Paragraphs &amp; Line Breaks</h2>
+    <p>Markdown's most-misunderstood rule: a single newline is invisible. You need a blank line to start a new paragraph.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:38%">What you write</th>
+            <th style="width:30%">What you get</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Two blocks separated by a blank line</td>
+            <td>Two separate paragraphs</td>
+            <td>Standard paragraph break</td>
+          </tr>
+          <tr>
+            <td>Two lines with no blank line</td>
+            <td>One paragraph joined with a space</td>
+            <td>Single newlines are treated as spaces</td>
+          </tr>
+          <tr>
+            <td>Line ending with two trailing spaces</td>
+            <td>Hard line break inside the paragraph</td>
+            <td>Invisible and easily stripped by editors</td>
+          </tr>
+          <tr>
+            <td><code>&lt;br&gt;</code> at end of line</td>
+            <td>Hard line break inside the paragraph</td>
+            <td>Explicit and reliable — prefer this</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="ba-grid">
+      <div class="ba-box">
+        <div class="ba-tag">Wrong — one newline</div>
+        <blockquote>First line<br>Second line<br><br><em>Renders as a single paragraph</em></blockquote>
+      </div>
+      <div class="ba-box after">
+        <div class="ba-tag">Right — blank line between</div>
+        <blockquote>First paragraph<br><br>Second paragraph<br><br><em>Renders as two paragraphs</em></blockquote>
+      </div>
+    </div>
+
+    <div class="tip blue">
+      <div class="tip-label">Remember</div>
+      Prefer <code>&lt;br&gt;</code> over trailing-space line breaks. Two trailing spaces are invisible, look like nothing, and are silently removed by most linters and editors on save.
+    </div>
+  </section>
+
+  <!-- EMPHASIS -->
+  <section id="emphasis">
+    <div class="section-label">Section 03</div>
+    <h2>Emphasis</h2>
+    <p>Bold, italic, strikethrough, and combinations. Both <code>*</code> and <code>_</code> work for most cases — with one important caveat around mid-word use.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:40%">Markdown</th>
+            <th style="width:22%">Renders as</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>*italic*</code> or <code>_italic_</code></td><td><em>italic</em></td><td>Single delimiter</td></tr>
+          <tr><td><code>**bold**</code> or <code>__bold__</code></td><td><strong>bold</strong></td><td>Double delimiter</td></tr>
+          <tr><td><code>***bold italic***</code></td><td><strong><em>bold italic</em></strong></td><td>Triple delimiter; also <code>___…___</code></td></tr>
+          <tr><td><code>~~strikethrough~~</code></td><td><s>strikethrough</s></td><td>GFM only — not standard CommonMark</td></tr>
+          <tr><td><code>`inline code`</code></td><td><code>inline code</code></td><td>Backtick — monospace, no parsing inside</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tip red">
+      <div class="tip-label">Watch Out</div>
+      Underscores do not work mid-word: <code>some_var_name</code> will trigger unwanted italics in many parsers. Use asterisks for intra-word emphasis (<code>some*var*name</code>), or escape the underscores (<code>some\_var\_name</code>).
+    </div>
+
+    <div class="tip gold">
+      <div class="tip-label">Convention</div>
+      Pick one delimiter style and use it everywhere. Most style guides prefer <code>**bold**</code> over <code>__bold__</code> and <code>*italic*</code> over <code>_italic_</code> — asterisks have fewer parser edge cases.
+    </div>
+  </section>
+
+  <!-- BLOCKQUOTES -->
+  <section id="blockquotes">
+    <div class="section-label">Section 04</div>
+    <h2>Blockquotes</h2>
+    <p>Blockquotes use a <code>&gt;</code> prefix. They can nest, span multiple paragraphs, and contain other Markdown formatting.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:48%">Markdown</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>&gt; Single-line quote</code></td>
+            <td>Basic blockquote</td>
+          </tr>
+          <tr>
+            <td><code>&gt; Line 1<br>&gt; Line 2</code></td>
+            <td>Multi-line — repeat <code>&gt;</code> on each line</td>
+          </tr>
+          <tr>
+            <td><code>&gt; Para 1<br>&gt;<br>&gt; Para 2</code></td>
+            <td>Multi-paragraph — use a bare <code>&gt;</code> as the blank line</td>
+          </tr>
+          <tr>
+            <td><code>&gt; Outer<br>&gt;&gt; Nested</code></td>
+            <td>Nested blockquote — add another <code>&gt;</code></td>
+          </tr>
+          <tr>
+            <td><code>&gt; Quote with **bold** and `code`</code></td>
+            <td>Markdown formatting works inside quotes</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <pre class="code-block">&gt; "Not all those who wander are lost."
+&gt;
+&gt; The quote continues in a second paragraph.
+&gt;&gt; A nested quote inside the above.</pre>
+
+    <div class="tip">
+      <div class="tip-label">Pro Tip</div>
+      Many platforms (GitHub, Obsidian, Notion) support alert-style blockquotes: <code>&gt; [!NOTE]</code>, <code>&gt; [!WARNING]</code>, <code>&gt; [!TIP]</code>. They render with coloured callout styling. Check your platform's docs for the exact syntax.
+    </div>
+  </section>
+
+  <!-- LISTS -->
+  <section id="lists">
+    <div class="section-label">Section 05</div>
+    <h2>Lists</h2>
+    <p>Markdown supports unordered, ordered, nested, and task lists. Indentation controls nesting — consistency matters here.</p>
+
+    <h3>Unordered lists</h3>
+    <pre class="code-block">- Item one        ← dash (recommended)
+* Item two        ← asterisk (also valid)
++ Item three      ← plus (also valid)</pre>
+
+    <div class="tip blue">
+      <div class="tip-label">Remember</div>
+      All three markers produce identical output, but mixing them within a single list creates separate lists in most parsers. Pick <code>-</code> and stick with it.
+    </div>
+
+    <h3>Ordered lists</h3>
+    <pre class="code-block">1. First item
+2. Second item
+3. Third item</pre>
+
+    <div class="tip gold">
+      <div class="tip-label">Lazy Numbering</div>
+      You can write every item as <code>1.</code> — most parsers auto-increment. This makes reordering easier, but the source is harder to scan at a glance.
+    </div>
+
+    <h3>Nested lists — indent by 2 or 4 spaces</h3>
+    <pre class="code-block">- Top-level item
+  - Nested item (2-space indent)
+    - Deeper item (4-space indent)
+- Another top-level item</pre>
+
+    <h3>Task lists (GitHub Flavored Markdown)</h3>
+    <pre class="code-block">- [x] Completed task
+- [ ] Incomplete task
+- [ ] Another item</pre>
+
+    <div class="tip">
+      <div class="tip-label">Pro Tip</div>
+      Task lists render as interactive checkboxes on GitHub issues and pull requests. They're a clean way to track sub-tasks without a separate project board.
+    </div>
+
+    <div class="tip red">
+      <div class="tip-label">Watch Out</div>
+      A blank line between list items creates a <em>loose list</em> — each item gets wrapped in a <code>&lt;p&gt;</code> tag, adding vertical spacing. Remove the blank lines for a tight, compact list.
+    </div>
+  </section>
+
+  <!-- CODE -->
+  <section id="code">
+    <div class="section-label">Section 06</div>
+    <h2>Code</h2>
+    <p>Two formats: inline backticks for short snippets within a sentence, and fenced blocks for multi-line code with optional syntax highlighting.</p>
+
+    <h3>Inline code</h3>
+    <pre class="code-block">Use the `print()` function to output text.</pre>
+    <p>If your snippet contains a backtick, wrap it in double backticks: <code>`` `tick` ``</code></p>
+
+    <h3>Fenced code blocks</h3>
+    <pre class="code-block">```python
+def greet(name):
+    return f"Hello, {name}!"
+```</pre>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:28%">Language tag</th>
+            <th>What gets highlighted</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>python</code></td><td>Python</td></tr>
+          <tr><td><code>js</code> / <code>javascript</code></td><td>JavaScript</td></tr>
+          <tr><td><code>ts</code> / <code>typescript</code></td><td>TypeScript</td></tr>
+          <tr><td><code>bash</code> / <code>sh</code></td><td>Shell scripts</td></tr>
+          <tr><td><code>html</code></td><td>HTML</td></tr>
+          <tr><td><code>css</code></td><td>CSS</td></tr>
+          <tr><td><code>json</code></td><td>JSON</td></tr>
+          <tr><td><code>sql</code></td><td>SQL</td></tr>
+          <tr><td><code>diff</code></td><td>Diffs — <code>+</code> lines green, <code>-</code> lines red</td></tr>
+          <tr><td>(no tag)</td><td>Plain monospace, no highlighting</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Indented code block (legacy style)</h3>
+    <pre class="code-block">    Indent by 4 spaces or 1 tab to create a code block.
+    Prefer fenced blocks — they support language tags and
+    are harder to accidentally trigger.</pre>
+
+    <div class="tip">
+      <div class="tip-label">Pro Tip</div>
+      Always specify a language tag — even for plain text. It signals intent to readers and prevents tools from running auto-detection, which can produce false positives on short snippets.
+    </div>
+  </section>
+
+  <!-- LINKS & IMAGES -->
+  <section id="links">
+    <div class="section-label">Section 07</div>
+    <h2>Links &amp; Images</h2>
+    <p>Links and images share the same syntax — images just add a <code>!</code> prefix. Both support inline and reference styles.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:50%">Markdown</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>[Link text](https://example.com)</code></td>
+            <td>Inline link</td>
+          </tr>
+          <tr>
+            <td><code>[Link text](https://example.com "Tooltip")</code></td>
+            <td>Inline link with hover tooltip</td>
+          </tr>
+          <tr>
+            <td><code>[Link text][ref-id]</code><br><code>[ref-id]: https://example.com</code></td>
+            <td>Reference-style — definition can go anywhere in the file</td>
+          </tr>
+          <tr>
+            <td><code>&lt;https://example.com&gt;</code></td>
+            <td>Auto-link — URL becomes its own clickable text</td>
+          </tr>
+          <tr>
+            <td><code>https://example.com</code></td>
+            <td>Bare auto-link (GFM only)</td>
+          </tr>
+          <tr>
+            <td><code>![Alt text](image.png)</code></td>
+            <td>Inline image</td>
+          </tr>
+          <tr>
+            <td><code>![Alt text](image.png "Caption")</code></td>
+            <td>Image with title tooltip</td>
+          </tr>
+          <tr>
+            <td><code>[![Alt](img.png)](https://example.com)</code></td>
+            <td>Clickable image — image wrapped in a link</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tip">
+      <div class="tip-label">Pro Tip</div>
+      Use reference-style links when a URL appears multiple times or when long URLs clutter the prose. Group all definitions at the bottom of the file for easy maintenance.
+    </div>
+
+    <div class="tip red">
+      <div class="tip-label">Watch Out</div>
+      Always write descriptive alt text. <code>![photo.png](photo.png)</code> is meaningless to screen readers. Describe what the image <em>communicates</em>, not just what it depicts: <code>![Bar chart showing 40% growth in Q3](chart.png)</code>.
+    </div>
+  </section>
+
+  <!-- TABLES -->
+  <section id="tables">
+    <div class="section-label">Section 08</div>
+    <h2>Tables</h2>
+    <p>Tables are a GitHub Flavored Markdown (GFM) extension — not part of standard CommonMark. Pipes separate columns; a separator row with dashes defines the header.</p>
+
+    <pre class="code-block">| Name    | Role      | Active |
+| ------- | --------- | ------ |
+| Alice   | Engineer  | Yes    |
+| Bob     | Designer  | No     |</pre>
+
+    <h3>Column alignment</h3>
+    <pre class="code-block">| Left    | Centre    | Right  |
+| :------ | :-------: | -----: |
+| text    | text      | text   |</pre>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:25%">Separator syntax</th>
+            <th>Alignment</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>---</code> or <code>:---</code></td><td>Left (default)</td></tr>
+          <tr><td><code>:---:</code></td><td>Centre</td></tr>
+          <tr><td><code>---:</code></td><td>Right</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tip gold">
+      <div class="tip-label">Limitations</div>
+      Tables cannot contain multi-line cells, and complex formatting inside cells is limited. For anything more structured, fall back to raw HTML.
+    </div>
+
+    <div class="tip blue">
+      <div class="tip-label">Remember</div>
+      Outer pipes (at the start and end of each row) are optional but strongly recommended for readability. The dashes in the separator row don't need to match the column width — <code>| --- |</code> is enough.
+    </div>
+  </section>
+
+  <!-- HORIZONTAL RULES -->
+  <section id="hr">
+    <div class="section-label">Section 09</div>
+    <h2>Horizontal Rules</h2>
+    <p>A horizontal rule renders a thematic break — a visible dividing line between sections of content.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:32%">Markdown</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>---</code></td><td>Three or more dashes (most common)</td></tr>
+          <tr><td><code>***</code></td><td>Three or more asterisks</td></tr>
+          <tr><td><code>___</code></td><td>Three or more underscores</td></tr>
+          <tr><td><code>- - -</code> or <code>* * *</code></td><td>Spaces between characters are also valid</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tip red">
+      <div class="tip-label">Watch Out</div>
+      <code>---</code> placed directly under a line of text is interpreted as a <strong>Setext H2 heading</strong>, not a horizontal rule. Always leave a blank line above <code>---</code> if you want a rule.
+    </div>
+
+    <div class="ba-grid">
+      <div class="ba-box">
+        <div class="ba-tag">Danger — creates an H2 heading</div>
+        <blockquote>My section title<br>---</blockquote>
+      </div>
+      <div class="ba-box after">
+        <div class="ba-tag">Correct — creates a horizontal rule</div>
+        <blockquote>My section title<br><br>---</blockquote>
+      </div>
+    </div>
+  </section>
+
+  <!-- ESCAPING -->
+  <section id="escaping">
+    <div class="section-label">Section 10</div>
+    <h2>Escaping &amp; Special Characters</h2>
+    <p>Prefix a Markdown character with a backslash (<code>\</code>) to render it literally. HTML entities also work anywhere in a Markdown document.</p>
+
+    <h3>Characters you can escape with <code>\</code></h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:18%">Character</th>
+            <th style="width:28%">Escaped form</th>
+            <th>Name</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>\</code></td><td><code>\\</code></td><td>Backslash</td></tr>
+          <tr><td><code>`</code></td><td><code>\`</code></td><td>Backtick</td></tr>
+          <tr><td><code>*</code></td><td><code>\*</code></td><td>Asterisk</td></tr>
+          <tr><td><code>_</code></td><td><code>\_</code></td><td>Underscore</td></tr>
+          <tr><td><code>{}</code></td><td><code>\{\}</code></td><td>Curly braces</td></tr>
+          <tr><td><code>[]</code></td><td><code>\[\]</code></td><td>Square brackets</td></tr>
+          <tr><td><code>()</code></td><td><code>\(\)</code></td><td>Parentheses</td></tr>
+          <tr><td><code>#</code></td><td><code>\#</code></td><td>Hash / pound</td></tr>
+          <tr><td><code>+</code></td><td><code>\+</code></td><td>Plus</td></tr>
+          <tr><td><code>-</code></td><td><code>\-</code></td><td>Dash / minus</td></tr>
+          <tr><td><code>.</code></td><td><code>\.</code></td><td>Full stop</td></tr>
+          <tr><td><code>!</code></td><td><code>\!</code></td><td>Exclamation mark</td></tr>
+          <tr><td><code>|</code></td><td><code>\|</code></td><td>Pipe (inside tables)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Common HTML entities</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:22%">Entity</th>
+            <th style="width:22%">Renders as</th>
+            <th>Use for</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>&amp;amp;</code></td><td>&amp;</td><td>Ampersand in HTML contexts</td></tr>
+          <tr><td><code>&amp;lt;</code></td><td>&lt;</td><td>Less-than / opening angle bracket</td></tr>
+          <tr><td><code>&amp;gt;</code></td><td>&gt;</td><td>Greater-than / closing angle bracket</td></tr>
+          <tr><td><code>&amp;nbsp;</code></td><td>(non-breaking space)</td><td>Prevent a line break between two words</td></tr>
+          <tr><td><code>&amp;mdash;</code></td><td>—</td><td>Em dash</td></tr>
+          <tr><td><code>&amp;ndash;</code></td><td>–</td><td>En dash</td></tr>
+          <tr><td><code>&amp;copy;</code></td><td>©</td><td>Copyright symbol</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tip blue">
+      <div class="tip-label">Remember</div>
+      Markdown passes raw HTML through to the output, so tags and entities work in most parsers. However, platforms like GitHub comments and some static site generators sanitise HTML for security — don't rely on it everywhere.
+    </div>
+  </section>
+
+  <!-- COMMON MISTAKES -->
+  <section id="mistakes">
+    <div class="section-label">Section 11</div>
+    <h2>Common Mistakes</h2>
+    <p>The errors that trip up even experienced Markdown writers — most come down to whitespace and parser behaviour.</p>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="num">1</div>
+        <strong>One newline ≠ new paragraph</strong>
+        <span>A single line break is absorbed as a space. You need a blank line between blocks to create a new paragraph.</span>
+      </div>
+      <div class="card">
+        <div class="num">2</div>
+        <strong>Underscore mid-word</strong>
+        <span><code>some_var_name</code> can trigger unwanted italics. Use asterisks for intra-word emphasis, or escape: <code>some\_var\_name</code>.</span>
+      </div>
+      <div class="card">
+        <div class="num">3</div>
+        <strong>--- after text = heading</strong>
+        <span>Dashes directly under a line of text create an H2, not a rule. Always leave a blank line above <code>---</code> if you want a horizontal rule.</span>
+      </div>
+      <div class="card">
+        <div class="num">4</div>
+        <strong>Missing space after #</strong>
+        <span><code>#Heading</code> is not a heading in most parsers — they require <code># Heading</code> with a space. Without it you get literal hash characters.</span>
+      </div>
+      <div class="card">
+        <div class="num">5</div>
+        <strong>Mixing list markers</strong>
+        <span>Using <code>-</code>, <code>*</code>, and <code>+</code> in the same list restarts the list in many parsers. Pick one marker and keep it consistent.</span>
+      </div>
+      <div class="card">
+        <div class="num">6</div>
+        <strong>Loose vs tight lists</strong>
+        <span>Blank lines between list items wrap each item in <code>&lt;p&gt;</code> tags, adding vertical space. Omit blank lines for a compact list.</span>
+      </div>
+      <div class="card">
+        <div class="num">7</div>
+        <strong>Trailing-space line breaks</strong>
+        <span>Two trailing spaces produce a <code>&lt;br&gt;</code>, but they're invisible and silently stripped by most editors on save. Use explicit <code>&lt;br&gt;</code> instead.</span>
+      </div>
+      <div class="card">
+        <div class="num">8</div>
+        <strong>Tables aren't CommonMark</strong>
+        <span>Tables are a GFM extension. They won't render in standard CommonMark parsers, Pandoc defaults, or many static site generators.</span>
+      </div>
+      <div class="card">
+        <div class="num">9</div>
+        <strong>Empty image alt text</strong>
+        <span><code>![](image.png)</code> leaves screen readers silent. Always write alt text that conveys the image's meaning, not just its filename.</span>
+      </div>
+      <div class="card">
+        <div class="num">10</div>
+        <strong>Formatting inside backticks</strong>
+        <span>Markdown is not parsed inside inline code: <code>`**not bold**`</code> renders literally. Use HTML if you genuinely need formatted code text.</span>
+      </div>
+    </div>
+
+    <div class="tip">
+      <div class="tip-label">Pro Tip</div>
+      When Markdown doesn't render as expected, check three things: (1) missing blank lines, (2) inconsistent indentation, and (3) which parser you're using — CommonMark, GFM, and MultiMarkdown have real behavioural differences.
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  Markdown Cheat Sheet · Built with Claude · June 2026
+</footer>
+
+<script>
+  function scrollToSection(id) {
+    document.getElementById(id).scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  const sections = document.querySelectorAll('section[id]');
+  const navBtns = document.querySelectorAll('nav .nav-btn');
+  const navObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navBtns.forEach(b => b.classList.remove('active'));
+        navBtns.forEach(b => {
+          if (b.getAttribute('onclick').includes("'" + entry.target.id + "'"))
+            b.classList.add('active');
+        });
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+  sections.forEach(s => navObserver.observe(s));
+
+  if (!window.matchMedia('(hover: hover)').matches) {
+    const cards = document.querySelectorAll('.card');
+    const cardObserver = new IntersectionObserver(entries => {
+      entries.forEach(e => { e.target.dataset.ratio = e.isIntersecting ? e.intersectionRatio : 0; });
+      let best = null, bestR = 0;
+      cards.forEach(c => { const r = parseFloat(c.dataset.ratio)||0; if (r > bestR) { bestR = r; best = c; } });
+      cards.forEach(c => c.classList.toggle('in-view', c === best && bestR > 0));
+    }, { threshold: [0, 0.25, 0.5, 0.75, 1] });
+    cards.forEach(c => cardObserver.observe(c));
+  }
+</script>
+</body>
+</html>
