@@ -20,7 +20,7 @@ CLAUDE.md
 
 All cheatsheets share the design system defined in `cheatsheets/cheatsheet.css`. The stylesheet is the single source of truth for tokens, layout, and component styles.
 
-All cheatsheets are built with the `cheatsheet-builder` Claude skill. The skill lives outside this repo (it is a Claude.ai user skill), but its conventions must be respected when editing any cheatsheet:
+All cheatsheets are built with the `cheatsheet-builder` skill (`.claude/commands/cheatsheet-builder.md`). When asked to create a new cheatsheet, invoke it with `/cheatsheet-builder`. Its conventions must be respected when editing any cheatsheet:
 
 - Each cheatsheet links to `cheatsheet.css` via `<link rel="stylesheet" href="cheatsheet.css">` — do not inline CSS or extract it to a separate per-cheatsheet file
 - Navigation uses `.nav-btn` buttons — do not use `<a href>` tags in the nav
@@ -34,14 +34,13 @@ All cheatsheets are built with the `cheatsheet-builder` Claude skill. The skill 
 
 ## Adding a New Cheatsheet
 
-1. Create a new conversation in Claude.ai
-2. Use the `cheatsheet-builder` skill to generate the HTML
-3. Download the HTML from the Artifacts panel
-4. Strip the `<style>` block from the downloaded file
-5. Add `<link rel="stylesheet" href="cheatsheet.css">` in its place (alongside the Google Fonts link)
-6. Save it to `cheatsheets/<slug>.html`
-7. Add an `a.sheet-card` panel to the `.card-grid` in `index.html` (tag, title, one-sentence description)
-8. Update the table in `README.md`
+Run `/cheatsheet-builder` and describe the topic. The skill will:
+
+1. Confirm the section list before writing
+2. Write `cheatsheets/<slug>.html` using the shared stylesheet (no inline CSS)
+3. Add an `a.sheet-card` block to the `.card-grid` in `index.html`
+
+After the skill completes, update the table in `README.md` manually.
 
 ## Editing the Design System
 
