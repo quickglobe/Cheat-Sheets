@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitHub Cheat Sheet</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23d63555'/%3E%3Cpath d='M8 8l10 8-10 8' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3Cline x1='20' y1='24' x2='26' y2='24' stroke='white' stroke-width='3.5' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="cheatsheet.css">
+</head>
+<body>
+
+<nav>
+  <a href="../index.html" class="logo">GitHub</a>
+  <button class="nav-btn" onclick="scrollToSection('big-picture')">Big Picture</button>
+  <button class="nav-btn" onclick="scrollToSection('branches')">Branches</button>
+  <button class="nav-btn" onclick="scrollToSection('commits')">Committing</button>
+  <button class="nav-btn" onclick="scrollToSection('push-pull')">Push &amp; Pull</button>
+  <button class="nav-btn" onclick="scrollToSection('pull-requests')">Pull Requests</button>
+  <button class="nav-btn" onclick="scrollToSection('merging')">Merging</button>
+  <button class="nav-btn" onclick="scrollToSection('conflicts')">Conflicts</button>
+  <button class="nav-btn" onclick="scrollToSection('gh-cli')">gh CLI</button>
+</nav>
+
+<div class="container">
+  <div class="hero">
+    <h1>GitHub Cheat Sheet</h1>
+    <p>Git and GitHub from the ground up — commits, branches, pull requests, and the decisions you make every time you click Merge.</p>
+  </div>
+
+  <!-- BIG PICTURE -->
+  <section id="big-picture">
+    <div class="section-label">Section 01</div>
+    <h2>The Big Picture</h2>
+    <p>Git and GitHub are two different things that work together. Understanding the distinction — and the four zones your code moves through — makes everything else click.</p>
+
+    <h3>Git vs GitHub</h3>
+    <p><strong>Git</strong> is version-control software that runs on your computer. It tracks changes, manages branches, and maintains your project's full history — all locally, with no internet required. <strong>GitHub</strong> is a website that hosts Git repositories in the cloud so teams can share code, review changes, and merge work together.</p>
+    <p>When Claude Code runs <code>git commit</code>, that's a local operation. Nothing reaches GitHub until something explicitly pushes.</p>
+
+    <h3>The four zones</h3>
+    <p>Every change you make moves through four places before it's on GitHub:</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Zone</th><th>What lives here</th><th>How to move forward</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Working directory</strong></td>
+            <td>Files you've edited but haven't told Git about yet</td>
+            <td><code>git add &lt;file&gt;</code></td>
+          </tr>
+          <tr>
+            <td><strong>Staging area</strong></td>
+            <td>Changes you've flagged to include in the next commit</td>
+            <td><code>git commit -m "..."</code></td>
+          </tr>
+          <tr>
+            <td><strong>Local history</strong></td>
+            <td>Committed snapshots — safe, permanent, still private</td>
+            <td><code>git push</code></td>
+          </tr>
+          <tr>
+            <td><strong>GitHub (remote)</strong></td>
+            <td>Shared history visible to everyone with repo access</td>
+            <td>Open a pull request to merge into <code>main</code></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Commits are snapshots, not diffs</h3>
+    <p>Each commit is a complete snapshot of every tracked file at a point in time — not a list of line-by-line changes. Git figures out what changed when you ask it to; that's just a display convenience. The upside: any commit can be restored exactly, and history never becomes corrupted by accumulated patches.</p>
+
+    <div class="tip blue">
+      <div class="tip-label">Remember</div>
+      Claude Code operates entirely in your local repo — it stages files, writes commits, and pushes branches. The only thing you need to do on GitHub itself is review and merge pull requests.
+    </div>
+
+    <div class="tip gold">
+      <div class="tip-label">When to Use GitHub</div>
+      You only need to visit GitHub when you're sharing work (reviewing a PR someone else opened) or finishing work (merging a PR into <code>main</code>). Day-to-day coding happens locally.
+    </div>
+  </section>
+
+  <!-- BRANCHES -->
+  <section id="branches">
+    <div class="section-label">Section 02</div>
+    <h2>Branches</h2>
+    <p>A branch is a moveable label that points to a commit. Creating one is free and instant — it's just a pointer, not a copy of your files.</p>
+
+    <h3>Why branches exist</h3>
+    <p>Branches let you isolate work so that <code>main</code> always stays in a working state. You develop a feature on its own branch, then merge it in when it's ready. If the feature goes sideways, you delete the branch — <code>main</code> is untouched. Multiple branches can exist at once, letting several features progress in parallel.</p>
+    <p><strong><code>main</code></strong> (or <code>master</code> in older repos) is the branch that represents your finished, deployable code. <strong>Feature branches</strong> are short-lived branches where work actually happens. Claude Code automatically creates feature branches named like <code>claude/descriptive-name-ABC123</code> — you'll see these as the source branch when it opens a pull request.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Command</th><th>What it does</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>git branch</code></td>
+            <td>List all local branches; current branch is marked with <code>*</code></td>
+          </tr>
+          <tr>
+            <td><code>git branch -a</code></td>
+            <td>List local and remote branches</td>
+          </tr>
+          <tr>
+            <td><code>git switch -c new-branch</code></td>
+            <td>Create a new branch and switch to it immediately</td>
+          </tr>
+          <tr>
+            <td><code>git switch branch-name</code></td>
+            <td>Switch to an existing branch</td>
+          </tr>
+          <tr>
+            <td><code>git checkout -b new-branch</code></td>
+            <td>Older equivalent of <code>switch -c</code> — you'll see both in docs</td>
+          </tr>
+          <tr>
+            <td><code>git branch -d branch-name</code></td>
+            <td>Delete a branch (safe — won't delete if unmerged)</td>
+          </tr>
+          <tr>
+            <td><code>git branch -D branch-name</code></td>
+            <td>Force-delete a branch, even if unmerged</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tip">
+      <div class="tip-label">Pro Tip</div>
+      Never commit directly to <code>main</code>. Even when working alone, the habit of using feature branches means you always have a clean <code>main</code> to fall back on, and your history stays readable.
+    </div>
+  </section>
+
+  <!-- STAGING & COMMITTING -->
+  <section id="commits">
+    <div class="section-label">Section 03</div>
+    <h2>Staging &amp; Committing</h2>
+    <p>A commit is a deliberate checkpoint — not an autosave. The staging area is what lets you choose exactly which changes go into each checkpoint.</p>
+
+    <h3>Why staging exists</h3>
+    <p>Imagine you've edited three files: a new feature, a bug fix, and a typo correction. You could lump them into one commit, but that makes history noisy and harder to understand later. The staging area lets you add the bug fix alone, commit it with a focused message, then stage and commit the other changes separately — even though they all changed at the same time.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Command</th><th>What it does</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>git status</code></td>
+            <td>Show which files are modified, staged, or untracked</td>
+          </tr>
+          <tr>
+            <td><code>git add filename</code></td>
+            <td>Stage a specific file</td>
+          </tr>
+          <tr>
+            <td><code>git add .</code></td>
+            <td>Stage every changed file in the current directory</td>
+          </tr>
+          <tr>
+            <td><code>git add -p</code></td>
+            <td>Interactively stage chunks of a file (advanced)</td>
+          </tr>
+          <tr>
+            <td><code>git diff</code></td>
+            <td>Show unstaged changes</td>
+          </tr>
+          <tr>
+            <td><code>git diff --staged</code></td>
+            <td>Show staged changes (what will go into the next commit)</td>
+          </tr>
+          <tr>
+            <td><code>git commit -m "message"</code></td>
+            <td>Commit staged changes with an inline message</td>
+          </tr>
+          <tr>
+            <td><code>git commit</code></td>
+            <td>Open your editor to write a longer commit message</td>
+          </tr>
+          <tr>
+            <td><code>git log --oneline</code></td>
+            <td>Show recent commits as a compact single-line list</td>
+          </tr>
+          <tr>
+            <td><code>git show abc1234</code></td>
+            <td>Show the full diff introduced by a specific commit</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Writing a good commit message</h3>
+    <p>The subject line should explain <em>why</em> the change was made, not just what changed — the diff already shows the what. A reader should be able to understand the intent without opening the files.</p>
+
+    <div class="ba-grid">
+      <div class="ba-box">
+        <div class="ba-tag">Vague</div>
+        <blockquote><code>fix bug</code><br><br><code>update styles</code><br><br><code>changes</code></blockquote>
+      </div>
+      <div class="ba-box after">
+        <div class="ba-tag">Useful</div>
+        <blockquote><code>fix login redirect loop when session expires</code><br><br><code>increase nav button contrast for accessibility</code><br><br><code>remove deprecated payment API calls</code></blockquote>
+      </div>
+    </div>
+
+    <div class="tip gold">
+      <div class="tip-label">When Using Claude Code</div>
+      Claude Code stages and commits for you. Run <code>git log --oneline</code> afterwards to see what it did — it's a useful habit for staying aware of your project's history.
+    </div>
+
+    <div class="tip red">
+      <div class="tip-label">Watch Out</div>
+      Don't use <code>git commit --amend</code> on a commit that has already been pushed to GitHub. Amending rewrites history, which conflicts with what's on the remote and forces a disruptive push. Only amend commits that are still local.
+    </div>
+  </section>
+
+  <!-- PUSHING & PULLING -->
+  <section id="push-pull">
+    <div class="section-label">Section 04</div>
+    <h2>Pushing &amp; Pulling</h2>
+    <p>Pushing uploads your local commits to GitHub; pulling downloads the latest from GitHub into your local repo. Neither happens automatically.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Command</th><th>What it does</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>git push</code></td>
+            <td>Upload local commits to the tracked remote branch</td>
+          </tr>
+          <tr>
+            <td><code>git push -u origin branch-name</code></td>
+            <td>Push and set up tracking — so future <code>git push</code> knows where to go</td>
+          </tr>
+          <tr>
+            <td><code>git push --force-with-lease</code></td>
+            <td>Force push safely — fails if someone else has pushed since you last fetched</td>
+          </tr>
+          <tr>
+            <td><code>git fetch</code></td>
+            <td>Download remote changes without touching your working files</td>
+          </tr>
+          <tr>
+            <td><code>git pull</code></td>
+            <td>Fetch and then merge remote changes into your current branch</td>
+          </tr>
+          <tr>
+            <td><code>git pull --rebase</code></td>
+            <td>Fetch and replay your local commits on top (avoids merge commits)</td>
+          </tr>
+          <tr>
+            <td><code>git remote -v</code></td>
+            <td>Show the remote URLs your repo is connected to</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>What <code>-u origin branch-name</code> means</h3>
+    <p><code>origin</code> is the default nickname Git gives to the remote repo (usually your GitHub repo). The <code>-u</code> flag tells Git to remember this remote branch as the default target for future pushes and pulls from this branch. After the first push with <code>-u</code>, you can just type <code>git push</code> — Git already knows where to send it. Claude Code always uses this pattern when it first pushes a new branch.</p>
+
+    <h3>fetch vs pull</h3>
+    <p><code>git fetch</code> is safe — it downloads remote commits into your local Git database without changing any of your files. <code>git pull</code> does a fetch then immediately merges the result into your current branch, which can introduce a merge commit or conflict. When you're unsure what changed remotely, fetch first, inspect with <code>git log origin/main</code>, then decide whether to merge.</p>
+
+    <div class="tip blue">
+      <div class="tip-label">Remember</div>
+      <code>git status</code> is your best friend. Run it before and after any Git operation to understand exactly what state your repo is in — what's staged, what's not, and whether you're ahead of or behind the remote.
+    </div>
+  </section>
+
+  <!-- PULL REQUESTS -->
+  <section id="pull-requests">
+    <div class="section-label">Section 05</div>
+    <h2>Pull Requests</h2>
+    <p>A pull request is a proposal to merge one branch into another, with a built-in place for discussion, review, and automated checks — before anything touches <code>main</code>.</p>
+
+    <h3>Anatomy of a pull request</h3>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Part</th><th>What it is</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Base branch</strong></td>
+            <td>The branch you want to merge <em>into</em> — almost always <code>main</code></td>
+          </tr>
+          <tr>
+            <td><strong>Compare branch</strong></td>
+            <td>The branch with your changes — what Claude Code pushed</td>
+          </tr>
+          <tr>
+            <td><strong>Description</strong></td>
+            <td>Explains what changed, why, and how to test it</td>
+          </tr>
+          <tr>
+            <td><strong>Reviewers</strong></td>
+            <td>People asked to read and approve the changes</td>
+          </tr>
+          <tr>
+            <td><strong>CI checks</strong></td>
+            <td>Automated tests and linters that run on every push — shown as green ticks or red crosses</td>
+          </tr>
+          <tr>
+            <td><strong>Merge button</strong></td>
+            <td>Appears once checks pass and approvals are in place — clicking it applies the merge strategy you choose</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Draft vs ready for review</h3>
+    <p>A <strong>draft PR</strong> signals that work is in progress and not ready for review yet — CI still runs, but reviewers know not to dig in. A <strong>ready-for-review PR</strong> is requesting feedback. Claude Code always opens PRs as ready for review.</p>
+
+    <h3>Reviewing a PR</h3>
+    <p>On the <strong>Files changed</strong> tab you'll see every line that was added (green) or removed (red). You can click on any line to leave an inline comment. When you're done, choose one of three review outcomes: <strong>Approve</strong> (looks good), <strong>Request changes</strong> (needs work before merging), or <strong>Comment</strong> (observations without a verdict).</p>
+
+    <div class="tip">
+      <div class="tip-label">Pro Tip</div>
+      Read the PR description before diving into the code — Claude Code writes it to explain what changed and why. It saves time and gives you context that makes the diff much easier to follow.
+    </div>
+
+    <div class="tip blue">
+      <div class="tip-label">Remember</div>
+      Wait for CI checks to go green before merging. A red check means a test failed or the linter found a problem — merging anyway brings a broken state into <code>main</code>.
+    </div>
+  </section>
+
+  <!-- MERGING -->
+  <section id="merging">
+    <div class="section-label">Section 06</div>
+    <h2>Merge Strategies</h2>
+    <p>When you click the merge button on GitHub, you choose how the branch's commits are applied to <code>main</code>. The three options produce very different histories.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Strategy</th><th>What it creates on <code>main</code></th><th>Best for</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Merge commit</strong></td>
+            <td>All original commits, plus a new merge commit tying the branches together</td>
+            <td>Long-running branches where you want to preserve every commit for audit purposes</td>
+          </tr>
+          <tr>
+            <td><strong>Squash and merge</strong></td>
+            <td>All branch commits collapsed into one single new commit on <code>main</code></td>
+            <td>Feature branches — one PR becomes one clean commit; the branch is disposable</td>
+          </tr>
+          <tr>
+            <td><strong>Rebase and merge</strong></td>
+            <td>Each commit from the branch replayed on top of <code>main</code>, one by one, no merge commit</td>
+            <td>When you want linear history and each commit on the branch is already clean and meaningful</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>What each strategy looks like in git log</h3>
+    <p>Suppose a feature branch has three commits: <em>Create auth module</em>, <em>Add login form</em>, <em>Fix validation</em>.</p>
+
+    <pre class="code-block">
+# Merge commit — full branch history preserved, plus a merge node
+*   a1b2c3d  Merge pull request #42: Add user login
+|\
+| * f0e1d2c  Fix validation
+| * 9a8b7c6  Add login form
+| * 3d4e5f6  Create auth module
+|/
+*   e5f6a7b  Previous commit on main
+
+
+# Squash and merge — all three commits become one
+*   a1b2c3d  Add user login (#42)
+*   e5f6a7b  Previous commit on main
+
+
+# Rebase and merge — commits land individually, no merge node
+*   f0e1d2c  Fix validation
+*   9a8b7c6  Add login form
+*   3d4e5f6  Create auth module
+*   e5f6a7b  Previous commit on main</pre>
+
+    <div class="tip gold">
+      <div class="tip-label">Recommendation</div>
+      <strong>Squash and merge</strong> is the right choice for most feature branches. Your branch's work-in-progress commits (typo fixes, "oops" commits) disappear, and <code>main</code>'s history becomes a clean list of completed features — one entry per PR.
+    </div>
+
+    <div class="tip red">
+      <div class="tip-label">Watch Out</div>
+      Never rebase a branch that someone else is working on. Rebase rewrites commit hashes, so anyone who has based work on the old commits will have a broken history that's painful to reconcile.
+    </div>
+  </section>
+
+  <!-- CONFLICTS -->
+  <section id="conflicts">
+    <div class="section-label">Section 07</div>
+    <h2>Merge Conflicts</h2>
+    <p>A conflict happens when two branches each changed the same lines of the same file — Git can't know which version to keep, so it stops and asks you to decide.</p>
+
+    <h3>What causes a conflict</h3>
+    <p>Most merges are automatic. Conflicts only occur when both the source branch and the target branch modified the exact same region of a file since they diverged. Unrelated changes to different files, or even different parts of the same file, merge cleanly without any intervention.</p>
+
+    <h3>Reading conflict markers</h3>
+    <p>When Git encounters a conflict, it edits the file in place and wraps the competing versions in markers:</p>
+
+    <pre class="code-block">
+&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+const timeout = 5000;
+=======
+const timeout = 10000;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature/increase-timeout</pre>
+
+    <p>Everything between <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</code> and <code>=======</code> is what your current branch has. Everything between <code>=======</code> and <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code> is what the incoming branch has. Your job is to edit the file so it contains only the final version you want — no markers left behind.</p>
+
+    <h3>Resolving a conflict</h3>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Step</th><th>Command / action</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1. See which files have conflicts</td>
+            <td><code>git status</code> — conflicted files are listed under "both modified"</td>
+          </tr>
+          <tr>
+            <td>2. Open the file and edit it</td>
+            <td>Delete the markers and both conflicting versions, leaving only what you want</td>
+          </tr>
+          <tr>
+            <td>3. Mark the conflict resolved</td>
+            <td><code>git add &lt;filename&gt;</code></td>
+          </tr>
+          <tr>
+            <td>4. Complete the merge</td>
+            <td><code>git commit</code> — Git pre-fills the merge commit message</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>VS Code conflict UI</h3>
+    <p>If you open a conflicted file in VS Code, it highlights the conflict regions and shows clickable actions above each one: <strong>Accept Current Change</strong> (keep HEAD), <strong>Accept Incoming Change</strong> (keep the branch), <strong>Accept Both Changes</strong> (keep both, stacked), or <strong>Compare Changes</strong> (diff view). For straightforward conflicts this is much faster than editing the markers manually.</p>
+
+    <div class="tip">
+      <div class="tip-label">Pro Tip</div>
+      Most conflicts look scarier than they are. The two versions are usually just different values or slightly different function calls — you read them, pick the right one (or combine them), delete the markers, and you're done.
+    </div>
+
+    <div class="tip gold">
+      <div class="tip-label">Using Claude Code</div>
+      If you hit a conflict you're unsure about, you can ask Claude Code to resolve it. Describe which version or intent should win, and it will edit the files, remove the markers, and commit the resolution.
+    </div>
+
+    <div class="tip red">
+      <div class="tip-label">Watch Out</div>
+      Never commit a file that still contains conflict markers (<code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code>, <code>=======</code>, <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code>). They are literal text in the file — your app will break, your tests will fail, and it'll be obvious to anyone reading the code that the conflict was never properly resolved.
+    </div>
+  </section>
+
+  <!-- GH CLI -->
+  <section id="gh-cli">
+    <div class="section-label">Section 08</div>
+    <h2>GitHub CLI Quick Reference</h2>
+    <p>The <code>gh</code> CLI lets you interact with GitHub from the terminal — check PR status, create PRs, and merge branches without leaving the command line.</p>
+
+    <h3>One-time setup</h3>
+    <p>Run <code>gh auth login</code> once and follow the prompts. After that, all <code>gh</code> commands authenticate automatically.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Command</th><th>What it does</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>gh pr list</code></td>
+            <td>Show all open pull requests in the repo</td>
+          </tr>
+          <tr>
+            <td><code>gh pr view</code></td>
+            <td>Show the PR for the current branch in the terminal</td>
+          </tr>
+          <tr>
+            <td><code>gh pr view --web</code></td>
+            <td>Open the current branch's PR in your browser</td>
+          </tr>
+          <tr>
+            <td><code>gh pr create</code></td>
+            <td>Create a PR for the current branch interactively</td>
+          </tr>
+          <tr>
+            <td><code>gh pr create --title "..." --body "..."</code></td>
+            <td>Create a PR with title and description inline (non-interactive)</td>
+          </tr>
+          <tr>
+            <td><code>gh pr merge</code></td>
+            <td>Merge the current branch's PR — prompts you to choose the merge strategy</td>
+          </tr>
+          <tr>
+            <td><code>gh pr merge --squash</code></td>
+            <td>Merge with squash strategy directly, no prompt</td>
+          </tr>
+          <tr>
+            <td><code>gh pr checkout 42</code></td>
+            <td>Check out PR #42 locally so you can inspect or run the code</td>
+          </tr>
+          <tr>
+            <td><code>gh pr status</code></td>
+            <td>Show the status of PRs relevant to you (created, assigned, review requested)</td>
+          </tr>
+          <tr>
+            <td><code>gh issue list</code></td>
+            <td>List open issues in the repo</td>
+          </tr>
+          <tr>
+            <td><code>gh issue view 15</code></td>
+            <td>Read issue #15 in the terminal</td>
+          </tr>
+          <tr>
+            <td><code>gh repo clone owner/repo</code></td>
+            <td>Clone a GitHub repository by its owner/name shorthand</td>
+          </tr>
+          <tr>
+            <td><code>gh repo view --web</code></td>
+            <td>Open the current repo on GitHub in your browser</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tip">
+      <div class="tip-label">Pro Tip</div>
+      Run <code>gh pr view</code> from inside any branch Claude Code created and you'll immediately see the PR it opened — including CI status, reviewers, and a direct link. No need to search GitHub.
+    </div>
+
+    <div class="tip blue">
+      <div class="tip-label">Remember</div>
+      <code>gh pr merge --squash</code> from the terminal does exactly the same thing as clicking "Squash and merge" on GitHub. If you're already in the terminal, there's no reason to switch to the browser just to merge.
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  GitHub Cheat Sheet · Built with Claude · June 2026
+</footer>
+
+<script src="cheatsheet.js"></script>
+</body>
+</html>
