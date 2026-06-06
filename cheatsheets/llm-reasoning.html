@@ -11,7 +11,7 @@
 <body>
 
 <nav>
-  <a href="../index.html" class="logo" style="text-decoration:none;">LLM Selector</a>
+  <a href="../index.html" class="logo">LLM Selector</a>
   <button class="nav-btn" onclick="scrollToSection('axes')">The Two Axes</button>
   <button class="nav-btn" onclick="scrollToSection('reasoning-wins')">Reasoning Wins</button>
   <button class="nav-btn" onclick="scrollToSection('size-wins')">Bigger Wins</button>
@@ -53,8 +53,12 @@
     <h3>The Key Dimensions to Weigh</h3>
     <div class="table-wrap">
       <table>
+        <colgroup>
+          <col style="width:22%">
+          <col style="width:39%">
+        </colgroup>
         <thead>
-          <tr><th style="width:22%">Dimension</th><th style="width:39%">Larger Model Helps</th><th style="width:39%">Reasoning Mode Helps</th></tr>
+          <tr><th>Dimension</th><th>Larger Model Helps</th><th>Reasoning Mode Helps</th></tr>
         </thead>
         <tbody>
           <tr><td><strong>Knowledge breadth</strong></td><td>Deep factual recall, obscure domain knowledge, recent events</td><td>Minimal benefit — thinking doesn't add knowledge it doesn't have</td></tr>
@@ -179,8 +183,9 @@
     <div id="tab-haiku-vs-sonnet" class="tab-panel active">
       <div class="table-wrap">
         <table>
+          <colgroup><col style="width:30%"><col style="width:35%"></colgroup>
           <thead>
-            <tr><th style="width:30%">Task</th><th style="width:35%">Haiku 4.5 + Thinking</th><th style="width:35%">Sonnet 4.6 (no thinking)</th></tr>
+            <tr><th>Task</th><th>Haiku 4.5 + Thinking</th><th>Sonnet 4.6 (no thinking)</th></tr>
           </thead>
           <tbody>
             <tr><td>Math / logic puzzles (moderate)</td><td>✅ Good — explicit reasoning compensates for smaller size</td><td>⚠️ Reasonable but may make step errors</td></tr>
@@ -204,8 +209,9 @@
     <div id="tab-sonnet-vs-opus" class="tab-panel">
       <div class="table-wrap">
         <table>
+          <colgroup><col style="width:30%"><col style="width:35%"></colgroup>
           <thead>
-            <tr><th style="width:30%">Task</th><th style="width:35%">Sonnet 4.6 + Thinking</th><th style="width:35%">Opus 4.6/4.7 (no thinking)</th></tr>
+            <tr><th>Task</th><th>Sonnet 4.6 + Thinking</th><th>Opus 4.6/4.7 (no thinking)</th></tr>
           </thead>
           <tbody>
             <tr><td>Complex math / hard reasoning</td><td>✅ Thinking mode very strong here</td><td>✅ Opus knowledge + heuristics also competitive</td></tr>
@@ -228,8 +234,9 @@
     <div id="tab-haiku-vs-opus" class="tab-panel">
       <div class="table-wrap">
         <table>
+          <colgroup><col style="width:30%"><col style="width:35%"></colgroup>
           <thead>
-            <tr><th style="width:30%">Task</th><th style="width:35%">Haiku 4.5 (no thinking)</th><th style="width:35%">Opus 4.6/4.7 (no thinking)</th></tr>
+            <tr><th>Task</th><th>Haiku 4.5 (no thinking)</th><th>Opus 4.6/4.7 (no thinking)</th></tr>
           </thead>
           <tbody>
             <tr><td>Simple Q&amp;A / lookup</td><td>✅ Fast, cheap, sufficient</td><td>❌ 25× more expensive with no quality gain</td></tr>
@@ -368,8 +375,12 @@
 
     <div class="table-wrap">
       <table>
+        <colgroup>
+          <col style="width:28%">
+          <col style="width:20%">
+        </colgroup>
         <thead>
-          <tr><th style="width:28%">If your task is…</th><th style="width:20%">Use this</th><th style="width:52%">Rationale</th></tr>
+          <tr><th>If your task is…</th><th>Use this</th><th>Rationale</th></tr>
         </thead>
         <tbody>
           <tr><td>Simple Q&amp;A, classification, routing, triage, basic text gen</td><td><code>Haiku</code> (no thinking)</td><td>Speed and cost dominate. Thinking adds overhead with no gain.</td></tr>
@@ -407,45 +418,6 @@
   <a href="https://platform.claude.com/docs/en/build-with-claude/extended-thinking" target="_blank">Anthropic Extended Thinking Docs</a>
 </footer>
 
-<script>
-  function showTab(event, id) {
-    const tabs = event.target.closest('.tabs');
-    const section = tabs.parentElement;
-    tabs.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    section.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-    event.target.classList.add('active');
-    document.getElementById(id).classList.add('active');
-  }
-
-  function scrollToSection(id) {
-    document.getElementById(id).scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-
-  const sections = document.querySelectorAll('section[id]');
-  const navBtns = document.querySelectorAll('nav .nav-btn');
-  const navObserver = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        navBtns.forEach(b => b.classList.remove('active'));
-        navBtns.forEach(b => {
-          if (b.getAttribute('onclick').includes("'" + entry.target.id + "'"))
-            b.classList.add('active');
-        });
-      }
-    });
-  }, { rootMargin: '-30% 0px -60% 0px' });
-  sections.forEach(s => navObserver.observe(s));
-
-  if (!window.matchMedia('(hover: hover)').matches) {
-    const cards = document.querySelectorAll('.card');
-    const cardObserver = new IntersectionObserver(entries => {
-      entries.forEach(e => { e.target.dataset.ratio = e.isIntersecting ? e.intersectionRatio : 0; });
-      let best = null, bestR = 0;
-      cards.forEach(c => { const r = parseFloat(c.dataset.ratio)||0; if (r > bestR) { bestR = r; best = c; } });
-      cards.forEach(c => c.classList.toggle('in-view', c === best && bestR > 0));
-    }, { threshold: [0, 0.25, 0.5, 0.75, 1] });
-    cards.forEach(c => cardObserver.observe(c));
-  }
-</script>
+<script src="cheatsheet.js"></script>
 </body>
 </html>

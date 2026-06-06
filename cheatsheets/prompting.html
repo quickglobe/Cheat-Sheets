@@ -11,7 +11,7 @@
 <body>
 
 <nav>
-  <a href="../index.html" class="logo" style="text-decoration:none;">Prompting</a>
+  <a href="../index.html" class="logo">Prompting</a>
   <button class="nav-btn" onclick="scrollToSection('rules')">Rules</button>
   <button class="nav-btn" onclick="scrollToSection('anatomy')">Anatomy</button>
   <button class="nav-btn" onclick="scrollToSection('tone')">Tone</button>
@@ -126,11 +126,11 @@
     <h2>Power Techniques</h2>
 
     <div class="tabs">
-      <button class="tab-btn active" onclick="showTab('few-shot')">Few-Shot</button>
-      <button class="tab-btn" onclick="showTab('cot')">Chain-of-Thought</button>
-      <button class="tab-btn" onclick="showTab('negatives')">Negative Constraints</button>
-      <button class="tab-btn" onclick="showTab('roles')">Role Assignment</button>
-      <button class="tab-btn" onclick="showTab('scaffold')">Output Scaffolding</button>
+      <button class="tab-btn active" onclick="showTab(event, 'few-shot')">Few-Shot</button>
+      <button class="tab-btn" onclick="showTab(event, 'cot')">Chain-of-Thought</button>
+      <button class="tab-btn" onclick="showTab(event, 'negatives')">Negative Constraints</button>
+      <button class="tab-btn" onclick="showTab(event, 'roles')">Role Assignment</button>
+      <button class="tab-btn" onclick="showTab(event, 'scaffold')">Output Scaffolding</button>
     </div>
 
     <div id="few-shot" class="tab-panel active">
@@ -232,7 +232,7 @@ Input: "It was okay, nothing special" → Sentiment: ?</div>
         <blockquote>"I'm an intermediate AI user working primarily with Claude. Create a 3–4 page PDF cheat sheet on effective prompting. Cover: prompt structure (role / context / task / format / constraints), tone control, markdown and XML tag usage, leveraging tools (web search, code execution, artifacts), advanced techniques (few-shot, chain-of-thought, negative constraints), and common mistakes. Include a before-and-after example using this very prompt. Use tables and colour-coded sections for scannability."</blockquote>
       </div>
     </div>
-    <div class="tip red" style="margin-top:16px;">
+    <div class="tip red">
       <div class="tip-label">What changed</div>
       Skill level stated · target model specified · page count given · topic list made exhaustive · "other useful details" replaced with concrete items · output styling requested
     </div>
@@ -266,53 +266,7 @@ Input: "It was okay, nothing special" → Sentiment: ?</div>
   Full prompting docs: <a href="https://docs.claude.com/en/docs/build-with-claude/prompt-engineering/overview" target="_blank">docs.claude.com</a>
 </footer>
 
-<script>
-  // Tab switching
-  function showTab(id) {
-    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-    event.target.classList.add('active');
-  }
-
-  // Card in-view highlighting — only on touch devices
-  if (!window.matchMedia('(hover: hover)').matches) {
-    const cards = document.querySelectorAll('.card');
-    const cardObserver = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        entry.target.dataset.visible = entry.isIntersecting ? entry.intersectionRatio : 0;
-      });
-      let best = null, bestRatio = 0;
-      cards.forEach(c => {
-        const r = parseFloat(c.dataset.visible) || 0;
-        if (r > bestRatio) { bestRatio = r; best = c; }
-      });
-      cards.forEach(c => c.classList.toggle('in-view', c === best && bestRatio > 0));
-    }, { threshold: [0, 0.25, 0.5, 0.75, 1] });
-    cards.forEach(c => cardObserver.observe(c));
-  }
-
-  // Smooth scroll
-  function scrollToSection(id) {
-    document.getElementById(id).scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-
-  // Highlight nav on scroll
-  const sections = document.querySelectorAll('section[id]');
-  const navBtns = document.querySelectorAll('nav .nav-btn');
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        navBtns.forEach(b => b.classList.remove('active'));
-        const sectionId = entry.target.id;
-        navBtns.forEach(b => {
-          if (b.getAttribute('onclick').includes("'" + sectionId + "'")) b.classList.add('active');
-        });
-      }
-    });
-  }, { rootMargin: '-30% 0px -60% 0px' });
-  sections.forEach(s => observer.observe(s));
-</script>
+<script src="cheatsheet.js"></script>
 
 </body>
 </html>
