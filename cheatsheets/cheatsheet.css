@@ -87,7 +87,12 @@ nav::-webkit-scrollbar { display: none; }
   white-space: nowrap;
   margin-right: 12px;
   flex-shrink: 0;
+  text-decoration: none;
 }
+
+.cmd-compare th:nth-child(1) { width: 24%; }
+.cmd-compare th:nth-child(2) { width: 28%; }
+.cmd-compare th:nth-child(3) { width: 28%; }
 
 .nav-btn {
   font-family: var(--font-body);

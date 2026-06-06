@@ -11,7 +11,7 @@
 <body>
 
 <nav>
-  <a href="../index.html" class="logo" style="text-decoration:none;">MD</a>
+  <a href="../index.html" class="logo">MD</a>
   <button class="nav-btn" onclick="scrollToSection('headings')">Headings</button>
   <button class="nav-btn" onclick="scrollToSection('paragraphs')">Paragraphs</button>
   <button class="nav-btn" onclick="scrollToSection('emphasis')">Emphasis</button>
@@ -40,10 +40,14 @@
     <h3>ATX style</h3>
     <div class="table-wrap">
       <table>
+        <colgroup>
+          <col style="width:32%">
+          <col style="width:22%">
+        </colgroup>
         <thead>
           <tr>
-            <th style="width:32%">Markdown</th>
-            <th style="width:22%">HTML output</th>
+            <th>Markdown</th>
+            <th>HTML output</th>
             <th>Notes</th>
           </tr>
         </thead>
@@ -84,10 +88,14 @@ Heading 2
 
     <div class="table-wrap">
       <table>
+        <colgroup>
+          <col style="width:38%">
+          <col style="width:30%">
+        </colgroup>
         <thead>
           <tr>
-            <th style="width:38%">What you write</th>
-            <th style="width:30%">What you get</th>
+            <th>What you write</th>
+            <th>What you get</th>
             <th>Notes</th>
           </tr>
         </thead>
@@ -141,10 +149,14 @@ Heading 2
 
     <div class="table-wrap">
       <table>
+        <colgroup>
+          <col style="width:40%">
+          <col style="width:22%">
+        </colgroup>
         <thead>
           <tr>
-            <th style="width:40%">Markdown</th>
-            <th style="width:22%">Renders as</th>
+            <th>Markdown</th>
+            <th>Renders as</th>
             <th>Notes</th>
           </tr>
         </thead>
@@ -177,9 +189,10 @@ Heading 2
 
     <div class="table-wrap">
       <table>
+        <colgroup><col style="width:48%"></colgroup>
         <thead>
           <tr>
-            <th style="width:48%">Markdown</th>
+            <th>Markdown</th>
             <th>Notes</th>
           </tr>
         </thead>
@@ -285,9 +298,10 @@ def greet(name):
 
     <div class="table-wrap">
       <table>
+        <colgroup><col style="width:28%"></colgroup>
         <thead>
           <tr>
-            <th style="width:28%">Language tag</th>
+            <th>Language tag</th>
             <th>What gets highlighted</th>
           </tr>
         </thead>
@@ -325,9 +339,10 @@ def greet(name):
 
     <div class="table-wrap">
       <table>
+        <colgroup><col style="width:50%"></colgroup>
         <thead>
           <tr>
-            <th style="width:50%">Markdown</th>
+            <th>Markdown</th>
             <th>Notes</th>
           </tr>
         </thead>
@@ -397,9 +412,10 @@ def greet(name):
 
     <div class="table-wrap">
       <table>
+        <colgroup><col style="width:25%"></colgroup>
         <thead>
           <tr>
-            <th style="width:25%">Separator syntax</th>
+            <th>Separator syntax</th>
             <th>Alignment</th>
           </tr>
         </thead>
@@ -430,9 +446,10 @@ def greet(name):
 
     <div class="table-wrap">
       <table>
+        <colgroup><col style="width:32%"></colgroup>
         <thead>
           <tr>
-            <th style="width:32%">Markdown</th>
+            <th>Markdown</th>
             <th>Notes</th>
           </tr>
         </thead>
@@ -471,10 +488,14 @@ def greet(name):
     <h3>Characters you can escape with <code>\</code></h3>
     <div class="table-wrap">
       <table>
+        <colgroup>
+          <col style="width:18%">
+          <col style="width:28%">
+        </colgroup>
         <thead>
           <tr>
-            <th style="width:18%">Character</th>
-            <th style="width:28%">Escaped form</th>
+            <th>Character</th>
+            <th>Escaped form</th>
             <th>Name</th>
           </tr>
         </thead>
@@ -499,10 +520,14 @@ def greet(name):
     <h3>Common HTML entities</h3>
     <div class="table-wrap">
       <table>
+        <colgroup>
+          <col style="width:22%">
+          <col style="width:22%">
+        </colgroup>
         <thead>
           <tr>
-            <th style="width:22%">Entity</th>
-            <th style="width:22%">Renders as</th>
+            <th>Entity</th>
+            <th>Renders as</th>
             <th>Use for</th>
           </tr>
         </thead>
@@ -595,36 +620,6 @@ def greet(name):
   Markdown Cheat Sheet · Built with Claude · June 2026
 </footer>
 
-<script>
-  function scrollToSection(id) {
-    document.getElementById(id).scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-
-  const sections = document.querySelectorAll('section[id]');
-  const navBtns = document.querySelectorAll('nav .nav-btn');
-  const navObserver = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        navBtns.forEach(b => b.classList.remove('active'));
-        navBtns.forEach(b => {
-          if (b.getAttribute('onclick').includes("'" + entry.target.id + "'"))
-            b.classList.add('active');
-        });
-      }
-    });
-  }, { rootMargin: '-30% 0px -60% 0px' });
-  sections.forEach(s => navObserver.observe(s));
-
-  if (!window.matchMedia('(hover: hover)').matches) {
-    const cards = document.querySelectorAll('.card');
-    const cardObserver = new IntersectionObserver(entries => {
-      entries.forEach(e => { e.target.dataset.ratio = e.isIntersecting ? e.intersectionRatio : 0; });
-      let best = null, bestR = 0;
-      cards.forEach(c => { const r = parseFloat(c.dataset.ratio)||0; if (r > bestR) { bestR = r; best = c; } });
-      cards.forEach(c => c.classList.toggle('in-view', c === best && bestR > 0));
-    }, { threshold: [0, 0.25, 0.5, 0.75, 1] });
-    cards.forEach(c => cardObserver.observe(c));
-  }
-</script>
+<script src="cheatsheet.js"></script>
 </body>
 </html>

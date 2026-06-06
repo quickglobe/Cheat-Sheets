@@ -11,7 +11,7 @@
 <body>
 
 <nav>
-  <a href="../index.html" class="logo" style="text-decoration:none;">VPN & Tailscale</a>
+  <a href="../index.html" class="logo">VPN & Tailscale</a>
   <button class="nav-btn" onclick="scrollToSection('vpn-basics')">VPN Basics</button>
   <button class="nav-btn" onclick="scrollToSection('how-vpns-work')">How VPNs Work</button>
   <button class="nav-btn" onclick="scrollToSection('vpn-protocols')">Protocols</button>
@@ -136,13 +136,19 @@ After VPN encapsulation:
 
     <div class="table-wrap">
       <table>
+        <colgroup>
+          <col style="width:18%">
+          <col style="width:22%">
+          <col style="width:20%">
+          <col style="width:20%">
+        </colgroup>
         <thead>
           <tr>
-            <th style="width:18%">Protocol</th>
-            <th style="width:22%">How it works</th>
-            <th style="width:20%">Speed</th>
-            <th style="width:20%">Security</th>
-            <th style="width:20%">Notes</th>
+            <th>Protocol</th>
+            <th>How it works</th>
+            <th>Speed</th>
+            <th>Security</th>
+            <th>Notes</th>
           </tr>
         </thead>
         <tbody>
@@ -257,11 +263,15 @@ After VPN encapsulation:
 
     <div class="table-wrap">
       <table>
+        <colgroup>
+          <col style="width:30%">
+          <col style="width:40%">
+        </colgroup>
         <thead>
           <tr>
-            <th style="width:30%">Connection type</th>
-            <th style="width:40%">How it works</th>
-            <th style="width:30%">Performance</th>
+            <th>Connection type</th>
+            <th>How it works</th>
+            <th>Performance</th>
           </tr>
         </thead>
         <tbody>
@@ -406,11 +416,15 @@ ssh user@machinename</div>
 
     <div class="table-wrap">
       <table>
+        <colgroup>
+          <col style="width:25%">
+          <col style="width:37%">
+        </colgroup>
         <thead>
           <tr>
-            <th style="width:25%">Dimension</th>
-            <th style="width:37%">Traditional VPN</th>
-            <th style="width:38%">Tailscale</th>
+            <th>Dimension</th>
+            <th>Traditional VPN</th>
+            <th>Tailscale</th>
           </tr>
         </thead>
         <tbody>
@@ -519,45 +533,6 @@ ssh user@machinename</div>
   <a href="https://www.wireguard.com/papers/wireguard.pdf" target="_blank">WireGuard White Paper</a>
 </footer>
 
-<script>
-  function showTab(event, id) {
-    const tabs = event.target.closest('.tabs');
-    const section = tabs.parentElement;
-    tabs.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    section.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-    event.target.classList.add('active');
-    document.getElementById(id).classList.add('active');
-  }
-
-  function scrollToSection(id) {
-    document.getElementById(id).scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-
-  const sections = document.querySelectorAll('section[id]');
-  const navBtns = document.querySelectorAll('nav .nav-btn');
-  const navObserver = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        navBtns.forEach(b => b.classList.remove('active'));
-        navBtns.forEach(b => {
-          if (b.getAttribute('onclick').includes("'" + entry.target.id + "'"))
-            b.classList.add('active');
-        });
-      }
-    });
-  }, { rootMargin: '-30% 0px -60% 0px' });
-  sections.forEach(s => navObserver.observe(s));
-
-  if (!window.matchMedia('(hover: hover)').matches) {
-    const cards = document.querySelectorAll('.card');
-    const cardObserver = new IntersectionObserver(entries => {
-      entries.forEach(e => { e.target.dataset.ratio = e.isIntersecting ? e.intersectionRatio : 0; });
-      let best = null, bestR = 0;
-      cards.forEach(c => { const r = parseFloat(c.dataset.ratio)||0; if (r > bestR) { bestR = r; best = c; } });
-      cards.forEach(c => c.classList.toggle('in-view', c === best && bestR > 0));
-    }, { threshold: [0, 0.25, 0.5, 0.75, 1] });
-    cards.forEach(c => cardObserver.observe(c));
-  }
-</script>
+<script src="cheatsheet.js"></script>
 </body>
 </html>
